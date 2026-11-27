@@ -2,7 +2,7 @@ rules_version = '2';
 // Modern F-15E Test Tracker - Firestore security rules.
 // Paste this whole file into Firebase console > Firestore Database > Rules, then press Publish.
 // Roles live in the document config/team: { owner: "<email>", admins: [emails], testers: [emails] }.
-//   owner   - shown as Owner. Always in admins. Only the owner can hand the owner role to someone else.
+//   owner   - shown as Owner ("" = not set yet). Always in admins. Only the owner hands the role on; any dev can fill it when empty.
 //   admins  - the owner plus the devs: full control (check / X, checks, sectors, photos, the team, adding devs).
 //   testers - can read everything and write only their own flags (reports/<their uid>), their name and the activity log.
 service cloud.firestore {
@@ -40,13 +40,13 @@ service cloud.firestore {
         && request.resource.data.owner == email()
         && request.resource.data.admins == [email()]
         && request.resource.data.testers == [];
-      // The owner and devs manage devs and testers. The owner always stays in admins,
-      // and only the current owner can hand the owner role to someone else.
+      // The owner and devs manage devs and testers. The owner (when set) always stays in admins.
+      // Only the current owner can hand the owner role on; while it is empty ("") any dev can fill it.
       allow update: if isAdmin()
         && request.resource.data.admins is list
         && request.resource.data.testers is list
-        && request.resource.data.owner in request.resource.data.admins
-        && (request.resource.data.owner == resource.data.owner || isOwner());
+        && (request.resource.data.owner == "" || request.resource.data.owner in request.resource.data.admins)
+        && (request.resource.data.owner == resource.data.owner || isOwner() || resource.data.owner == "");
       allow delete: if false;
     }
 
