@@ -2,10 +2,9 @@ rules_version = '2';
 // Modern F-15E Test Tracker - Firestore security rules.
 // Paste this whole file into Firebase console > Firestore Database > Rules, then press Publish.
 // Roles live in the document config/team: { owner: "<email>", admins: [emails], testers: [emails] }.
-//   owner   - the account that claimed the tracker first (open the site with ?claim=1).
-//   admins  - "leads" (the owner and Haack): set the official check / X, edit checks, sectors, photos and the team.
-//   testers - can read everything and write only their own flags (reports/<their uid>) and their own name.
-// Only the owner can change who is a lead; leads can add and remove testers.
+//   owner   - shown as Owner. Always in admins. Only the owner can hand the owner role to someone else.
+//   admins  - the owner plus the devs: full control (check / X, checks, sectors, photos, the team, adding devs).
+//   testers - can read everything and write only their own flags (reports/<their uid>), their name and the activity log.
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -41,18 +40,32 @@ service cloud.firestore {
         && request.resource.data.owner == email()
         && request.resource.data.admins == [email()]
         && request.resource.data.testers == [];
-      // Leads edit the tester list. Only the owner changes the lead list, and the owner always stays a lead.
+      // The owner and devs manage devs and testers. The owner always stays in admins,
+      // and only the current owner can hand the owner role to someone else.
       allow update: if isAdmin()
-        && request.resource.data.owner == resource.data.owner
-        && resource.data.owner in request.resource.data.admins
+        && request.resource.data.admins is list
         && request.resource.data.testers is list
-        && (isOwner() || request.resource.data.admins == resource.data.admins);
+        && request.resource.data.owner in request.resource.data.admins
+        && (request.resource.data.owner == resource.data.owner || isOwner());
       allow delete: if false;
     }
 
     match /config/roadmap {
       allow read: if isMember();
       allow write: if isAdmin();
+    }
+
+    match /config/seeded {
+      allow read: if isMember();
+      allow write: if isAdmin();
+    }
+
+    // Who did what: anyone on the team adds entries as themselves; nobody edits them; the owner and devs can clear them.
+    match /log/{id} {
+      allow read: if isMember();
+      allow create: if isMember() && request.resource.data.by == request.auth.uid;
+      allow update: if false;
+      allow delete: if isAdmin();
     }
 
     match /items/{id} {
