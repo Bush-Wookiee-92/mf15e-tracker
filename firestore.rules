@@ -1,0 +1,86 @@
+rules_version = '2';
+// Modern F-15E Test Tracker - Firestore security rules.
+// Paste this whole file into Firebase console > Firestore Database > Rules, then press Publish.
+// Roles live in the document config/team: { owner: "<email>", admins: [emails], testers: [emails] }.
+//   owner   - the account that claimed the tracker first (open the site with ?claim=1).
+//   admins  - "leads" (the owner and Haack): set the official check / X, edit checks, sectors, photos and the team.
+//   testers - can read everything and write only their own flags (reports/<their uid>) and their own name.
+// Only the owner can change who is a lead; leads can add and remove testers.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+    function email() {
+      return request.auth.token.email.lower();
+    }
+    function teamPath() {
+      return /databases/$(database)/documents/config/team;
+    }
+    function hasTeam() {
+      return exists(teamPath());
+    }
+    function team() {
+      return get(teamPath()).data;
+    }
+    function isAdmin() {
+      return signedIn() && hasTeam() && email() in team().admins;
+    }
+    function isMember() {
+      return signedIn() && hasTeam() && (email() in team().admins || email() in team().testers);
+    }
+    function isOwner() {
+      return signedIn() && hasTeam() && email() == team().owner;
+    }
+
+    match /config/team {
+      allow read: if isMember();
+      // First claim only: the person creating it becomes the owner and only lead.
+      allow create: if signedIn() && !hasTeam()
+        && request.resource.data.owner == email()
+        && request.resource.data.admins == [email()]
+        && request.resource.data.testers == [];
+      // Leads edit the tester list. Only the owner changes the lead list, and the owner always stays a lead.
+      allow update: if isAdmin()
+        && request.resource.data.owner == resource.data.owner
+        && resource.data.owner in request.resource.data.admins
+        && request.resource.data.testers is list
+        && (isOwner() || request.resource.data.admins == resource.data.admins);
+      allow delete: if false;
+    }
+
+    match /config/roadmap {
+      allow read: if isMember();
+      allow write: if isAdmin();
+    }
+
+    match /items/{id} {
+      allow read: if isMember();
+      allow write: if isAdmin();
+    }
+
+    match /reports/{uid} {
+      allow read: if isMember();
+      allow write: if isAdmin() || (isMember() && request.auth.uid == uid);
+    }
+
+    match /people/{uid} {
+      allow read: if isMember();
+      allow write: if isMember() && request.auth.uid == uid;
+    }
+
+    match /photos/{id} {
+      allow read: if isMember();
+      allow write: if isAdmin();
+    }
+
+    // "Ask to join": anyone signed in can file their own request; leads read and clear them.
+    match /requests/{uid} {
+      allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.email == email();
+      allow delete: if isAdmin() || (signedIn() && request.auth.uid == uid);
+    }
+  }
+}

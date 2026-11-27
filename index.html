@@ -1,0 +1,509 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Modern F-15E Roadmap</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;1,700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"><script src="config.js"></script><script type="module">const C=window.FBCONF;if(location.protocol!=='file:'&&C&&C.apiKey){const B='https://www.gstatic.com/firebasejs/10.12.2/';Promise.all([import(B+'firebase-app.js'),import(B+'firebase-auth.js'),import(B+'firebase-firestore.js')]).then(([A,U,F])=>{const app=A.initializeApp(C);const auth=U.getAuth(app);const fs=F.initializeFirestore(app,{ignoreUndefinedProperties:true});window.FBX={U,F,auth,fs};dispatchEvent(new Event('fbready'))}).catch(e=>{console.error(e);window.FBX=null;dispatchEvent(new Event('fbready'))})}else window.FBX=null;</script><style id="css">
+/* VOICE occasion: a campaign map the team is proud of, loud but exact
+   IDEA a night-ops sector map: every feature we added is a hex sector on one route, from founding (March 2026) to 2.6.9, then locked sectors ahead
+   PICTURE a tilted honeycomb of photo hexes over an endlessly drifting topo/radar background, with a selected-sector panel below
+   COLOUR near-black steel ground, gunmetal hexes, afterburner gold for the route and current build, HUD green for online, cyan for in work
+   TYPE Barlow Condensed (italic for big labels) + Barlow
+   LAYOUT top bar, map full width, sector panel (emblem | details + photos | build counter); one column under 760px, flat map on phones */
+:root{color-scheme:dark;--bg:#06080a;--steel:#1a2025;--steel2:#252d33;--edge:#3b464d;--ink:#eef2f4;--mut:#9aa7ae;--gold:#ffbf3f;--burn:#ff6a1a;--grn:#7ed68e;--cyn:#62c9ec}
+*{box-sizing:border-box;min-width:0}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Barlow,"Segoe UI",system-ui,sans-serif;overflow-x:clip}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+img{display:block;max-width:100%}
+a{color:var(--cyn)}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:radial-gradient(ellipse at 60% 40%,#121a1f 0%,#06080a 70%)}
+.bg>div{position:absolute}
+.sweep{opacity:.45;left:50%;top:45%;width:170vmax;height:170vmax;margin:-85vmax 0 0 -85vmax;border-radius:50%;background:conic-gradient(from 0deg,rgba(255,191,63,0) 0deg,rgba(255,191,63,0) 300deg,rgba(255,150,40,.10) 350deg,rgba(255,210,120,.22) 360deg);animation:spin 12s linear infinite}
+.scan{left:0;right:0;height:140px;top:0;background:linear-gradient(180deg,transparent,rgba(126,214,142,.06),transparent);animation:scan 9s linear infinite}
+.sit{position:absolute;inset:0;width:100%;height:100%}
+.sit .pan{animation:pan 80s ease-in-out infinite alternate}
+.sit .sym{opacity:.92}
+@keyframes pan{from{transform:translate(0,0)}to{transform:translate(-46px,-28px)}}
+.mfd{position:absolute;inset:0;display:none;font:700 17px/1 "Barlow Condensed",sans-serif;color:#f2f5f6}
+.mfd b{position:absolute;background:#000;padding:4px 7px;font-weight:700;letter-spacing:.04em}
+.mfd .v{writing-mode:vertical-rl;text-orientation:upright;padding:7px 4px;letter-spacing:0}
+.mfd i{position:absolute;font-style:normal;white-space:pre;line-height:1.15;text-shadow:0 0 4px #000}
+@media(min-width:1500px){.mfd{display:block}}
+.sit text{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:600}
+.vig{inset:0;background:radial-gradient(ellipse at 50% 45%,transparent 45%,rgba(0,0,0,.75) 100%)}
+@keyframes drift{to{transform:translate(640px,640px)}}
+@keyframes drift2{to{transform:translate(512px,-512px)}}
+@keyframes fall{to{transform:translateY(104px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes scan{from{transform:translateY(-160px)}to{transform:translateY(100vh)}}
+@keyframes twinkle{from{opacity:.15}to{opacity:1}}
+@keyframes glow{from{opacity:.35}to{opacity:1}}
+@keyframes flow{0%,100%{opacity:.25}50%{opacity:1}}
+.app{position:relative;z-index:1}
+.wrap{max-width:1280px;margin:0 auto;padding:0 max(3vw,16px)}
+.top{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;padding-block:16px 6px}
+.brand{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.brand b{font:italic 700 clamp(30px,4.4vw,46px)/1 "Barlow Condensed",sans-serif;letter-spacing:-.01em;background:linear-gradient(180deg,#fff 30%,#c9d3d8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand span{font:italic 700 clamp(22px,3vw,30px)/1 "Barlow Condensed",sans-serif;color:var(--burn)}
+.brand small{font-size:14px;color:var(--mut);flex-basis:100%}
+.top,.msg{text-shadow:0 1px 3px #000,0 0 10px #000}
+.brand b{text-shadow:none;filter:drop-shadow(0 2px 6px #000)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;border:1px solid var(--edge);background:rgba(20,26,30,.8);border-radius:4px;font-size:15px;white-space:nowrap}
+.chip b{font:700 22px/1 "Barlow Condensed",sans-serif}
+.btn{height:44px;padding:0 14px;border:1px solid var(--edge);background:rgba(26,32,37,.9);border-radius:4px;font-weight:600}
+.btn:hover{border-color:var(--gold)}
+.btn.on{background:var(--gold);color:#1a1205;border-color:var(--gold)}
+.btn.sm{height:36px;padding:0 10px;font-size:14px}
+.btn.warn{color:#ff8a80}
+.btn:disabled{opacity:.4;cursor:default}
+:focus-visible{outline:2px solid var(--cyn);outline-offset:2px}
+.msg{font-size:14px;color:var(--mut);margin:4px 0 0}
+.edbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:6px 0}
+.stage{position:relative;margin:8px 0 0;perspective:1500px}
+.plane{position:relative;transform-style:preserve-3d;transition:transform .6s}
+.tilt .plane{transform:rotateX(24deg);transform-origin:50% 60%}
+.hx{position:absolute;padding:0;border:0;background:none;transform-style:preserve-3d;transition:transform .25s}
+.hx:hover,.hx:focus-visible{transform:translateZ(18px) translateY(-4px);z-index:3}
+.hx:focus-visible{outline:none}
+.hx:focus-visible .fr{background:var(--cyn)}
+.fr,.fc,.gl{position:absolute;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+.fr{inset:0;background:linear-gradient(160deg,#59666e,#2a3237 60%,#4a565d)}
+.gl{inset:-6px;background:radial-gradient(circle,rgba(255,191,63,.9),rgba(255,106,26,.5) 60%,transparent 75%);opacity:0}
+.fc{inset:3px;background:#11161a;overflow:hidden}
+.fc img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.hx:hover .fc img{transform:scale(1.07)}
+.sh{position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,8,10,.75) 0%,rgba(6,8,10,0) 34%,rgba(6,8,10,.15) 52%,rgba(6,8,10,.92) 80%)}
+.cd{position:absolute;top:15%;left:0;right:0;text-align:center;font:700 max(12px,calc(var(--w)*.065))/1 "Barlow Condensed",sans-serif;color:#d8e0e4;white-space:nowrap}
+.cd i{font-style:normal;color:var(--grn)}
+.tg{position:absolute;top:24%;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#b8320c,var(--burn));color:#fff;font:700 max(11px,calc(var(--w)*.055))/1 "Barlow Condensed",sans-serif;padding:3px 8px 3px 6px;clip-path:polygon(0 0,100% 0,92% 100%,0 100%);white-space:nowrap}
+.tt{position:absolute;left:14%;right:14%;bottom:21%;text-align:center;font:700 clamp(13px,calc(var(--w)*.085),21px)/1.02 "Barlow Condensed",sans-serif;text-wrap:balance}
+.vv{position:absolute;left:0;right:0;bottom:12%;text-align:center;font-size:clamp(11px,calc(var(--w)*.055),14px);color:var(--gold);font-weight:600;white-space:nowrap}
+.s-planned .fc img{filter:grayscale(1) brightness(.45)}
+.s-planned .fr{background:linear-gradient(160deg,#2b3338,#161b1e)}
+.s-planned .cd{color:var(--cyn)}
+.s-wip .fr{background:linear-gradient(160deg,#62c9ec,#1d5263 55%,#62c9ec)}
+.s-start .fr,.s-current .fr{background:linear-gradient(160deg,#ffe39a,#c77a12 50%,#ffbf3f)}
+.s-current .gl,.sel .gl{animation:glow 1.6s ease-in-out infinite alternate}
+.sel .fr{background:linear-gradient(160deg,#fff,#ffbf3f 50%,#fff)}
+.flag{position:absolute;right:92%;top:50%;transform:translateY(-50%);background:#b8320c;color:#fff;font:700 calc(var(--w)*.075)/1 "Barlow Condensed",sans-serif;padding:7px 16px 7px 10px;clip-path:polygon(0 0,86% 0,100% 50%,86% 100%,0 100%);white-space:nowrap}
+.star{position:absolute;right:-6%;top:-9%;width:calc(var(--w)*.46);height:calc(var(--w)*.46);background:linear-gradient(160deg,#fff2c4,#ffbf3f 55%,#c77a12);clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);display:grid;place-items:center;color:#2a1a02;font:italic 700 calc(var(--w)*.08)/1 "Barlow Condensed",sans-serif;padding-top:6%}
+.chev{position:absolute;width:18px;height:18px;margin:-9px 0 0 -9px;pointer-events:none;z-index:2;animation:flow 2.4s ease-in-out infinite}
+.chev::before{content:"";position:absolute;inset:3px;border-top:4px solid var(--gold);border-right:4px solid var(--gold);transform:rotate(45deg)}
+.chev.fut::before{border-color:var(--cyn)}
+.panel{display:grid;grid-template-columns:200px minmax(0,1fr) 210px;gap:20px;align-items:start;margin:18px 0 26px;padding:18px;background:linear-gradient(180deg,rgba(26,32,37,.92),rgba(12,16,19,.95));border:1px solid var(--edge);border-radius:6px}
+.emb{position:relative;aspect-ratio:1/1.1547;display:grid;place-items:center;text-align:center}
+.emb .fr{background:linear-gradient(160deg,#ffbf3f,#7a4a0c 60%,#ffbf3f)}
+.emb .fc{display:grid;place-content:center;background:radial-gradient(circle,#3a2a10,#0d0f11 70%)}
+.emb b{display:block;font:italic 700 64px/1 "Barlow Condensed",sans-serif;color:var(--gold)}
+.emb span{display:block;font:700 16px/1.1 "Barlow Condensed",sans-serif;color:#e7d2a4}
+.ban{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(90deg,#6b4a0f,#c8901f 70%,transparent);color:#fff6dd;font:700 19px/1 "Barlow Condensed",sans-serif;padding:7px 34px 7px 14px;clip-path:polygon(0 0,100% 0,94% 100%,0 100%)}
+.ban.planned{background:linear-gradient(90deg,#143845,#2b7390 70%,transparent)}
+.ban.wip{background:linear-gradient(90deg,#123b48,#2394bb 70%,transparent)}
+.pt h2{font:700 clamp(30px,4vw,44px)/1.04 "Barlow Condensed",sans-serif;margin:10px 0 2px;letter-spacing:-.01em}
+.meta{color:var(--gold);font-weight:600;font-size:15px}
+.pt p{margin:8px 0;max-width:70ch}
+.pt ul{margin:8px 0 0;padding-left:18px;columns:2 20em;column-gap:28px}
+.pt li{break-inside:avoid;margin:0 0 5px;color:#d5dde1}
+.ph{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px;margin-top:14px}
+.ph figure{margin:0;background:#0d1114;border:1px solid var(--edge);border-radius:4px;overflow:hidden}
+.ph img{width:100%;aspect-ratio:16/10;object-fit:cover}
+.ph figcaption{font-size:13px;color:var(--mut);padding:6px 10px}
+.src{font-size:14px;color:var(--mut);margin-top:10px}
+.nav{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.bank{position:relative;aspect-ratio:1/1.1547;text-align:center}
+.bank .fr{background:linear-gradient(160deg,#ffbf3f,#5c3a08 60%,#ffbf3f)}
+.bank .fc{display:grid;place-content:center;background:radial-gradient(circle,#4a2c06,#0d0f11 72%)}
+.bank b{display:block;font:italic 700 54px/1 "Barlow Condensed",sans-serif;color:#ffd57a}
+.bank span{font:700 15px/1.1 "Barlow Condensed",sans-serif;color:#e7d2a4}
+.facts{margin:12px 0 0;padding:0;list-style:none;font-size:15px}
+.facts li{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--edge);padding:6px 0}
+.facts b{color:var(--gold);white-space:nowrap}
+.foot{color:var(--mut);font-size:14px;padding-bottom:30px}
+.foot h3{font:700 22px/1.1 "Barlow Condensed",sans-serif;color:var(--ink);margin:0 0 6px}
+.foot ol{columns:2 24em;padding-left:20px;margin:0}
+.foot li{break-inside:avoid;margin-bottom:4px}
+.plist{display:none}
+dialog{border:1px solid var(--edge);border-radius:8px;padding:0;background:#151a1e;color:var(--ink);width:min(820px,calc(100vw - 24px));max-height:calc(100vh - 32px)}
+dialog::backdrop{background:rgba(0,0,0,.72)}
+form.f{padding:18px 20px;display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
+form.f h3{grid-column:1/-1;margin:0;font:700 28px/1 "Barlow Condensed",sans-serif}
+form.f label{display:grid;gap:4px;font-size:14px;font-weight:600}
+form.f .full{grid-column:1/-1}
+form.f input,form.f select,form.f textarea{font-size:16px;font-weight:400;border:1px solid var(--edge);border-radius:4px;background:#0c1013;padding:9px 10px;min-height:44px}
+form.f textarea{min-height:100px;resize:vertical}
+.prev{height:120px;width:100%;object-fit:cover;border-radius:4px}
+.row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+@media(max-width:980px){.panel{grid-template-columns:150px minmax(0,1fr)}.bank{display:none}.emb b{font-size:46px}}
+@media(max-width:760px){.panel{grid-template-columns:minmax(0,1fr)}.emb{width:130px;margin:0 auto}form.f{grid-template-columns:minmax(0,1fr)}.flag{right:auto;left:50%;top:-4%;transform:translateX(-50%);padding:5px 10px;clip-path:none}}
+.hc{display:inline-flex;gap:6px}.hc .o{color:var(--grn)}.hc .x{color:#ff6b5e}.hc .u{color:#c9d3d8}
+.h-bad:not(.sel) .fr{background:linear-gradient(160deg,#ff9a8a,#7a1408 55%,#ff5a45)}
+.h-bad:not(.sel) .gl{background:radial-gradient(circle,rgba(255,80,60,.85),rgba(160,20,10,.45) 60%,transparent 75%);animation:glow 1.3s ease-in-out infinite alternate}
+.h-ok:not(.sel) .fr{background:linear-gradient(160deg,#b4f3bf,#1f5a2a 55%,#7ed68e)}
+.ckh{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:16px 0 8px}
+.ckh h3{margin:0;font:700 26px/1 "Barlow Condensed",sans-serif;letter-spacing:.02em}
+.bar{flex:1 1 140px;display:flex;height:8px;border-radius:4px;overflow:hidden;background:#3a444a}
+.bar i{display:block;height:100%}
+.tot{font-weight:600;color:var(--mut);font-size:15px}
+.flt{display:flex;gap:6px;flex-wrap:wrap}
+.flt button{height:34px;padding:0 12px;border:1px solid var(--edge);border-radius:17px;background:rgba(10,14,16,.75);font-size:14px;font-weight:600}
+.flt button[aria-pressed=true]{border-color:var(--gold);color:var(--gold)}
+.role{font-size:14px;color:var(--mut);margin:8px 0}
+.ck{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.ck li{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 10px;background:rgba(8,11,13,.78);border:1px solid var(--edge);border-left:4px solid #6a757b;border-radius:4px}
+.ck li.ok{border-left-color:var(--grn)}
+.ck li.bad{border-left-color:#ff5a45;background:rgba(58,12,8,.6)}
+.ck li.new{border:1px dashed var(--gold);border-left:4px solid var(--gold)}
+.mk{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;font:700 20px/1 Barlow,sans-serif;border:2px solid #6a757b;color:#9aa7ae}
+.ok>.mk{background:var(--grn);border-color:var(--grn);color:#08210e}
+.bad>.mk{background:#e5392a;border-color:#e5392a;color:#fff}
+.new>.mk{border-color:var(--gold);color:var(--gold)}
+.ckt b{display:block;font-weight:600;line-height:1.3}
+.ckt small{display:block;color:var(--mut);font-size:13.5px;margin-top:2px}
+.ckt small.nt{color:#ffb4a8}
+.rps{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.rp{font-size:13px;padding:2px 9px;border-radius:11px;border:1px solid var(--edge);background:#10161a;color:#cfd8dc}
+.rp.err{border-color:#a8741c;color:#ffc861}.rtt{display:inline-block;background:var(--gold);color:#2a1a02;font-weight:700;font-size:11.5px;padding:0 6px;border-radius:3px;margin-right:2px}.fxd{display:inline-block;background:var(--cyn);color:#04222c;font-weight:700;font-size:11.5px;padding:0 6px;border-radius:3px;margin-right:2px}.rp.look{border-color:#2f7d99;color:var(--cyn)}.rp.ok{border-color:#3f8a4c;color:var(--grn)}.rp.bad{border-color:#a8382c;color:#ff9d90}
+.cka{display:flex;flex-direction:column;gap:5px;align-items:flex-end}
+.grp{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.pill{height:32px;padding:0 10px;border:1px solid var(--edge);border-radius:16px;background:#151b1f;font-size:13.5px;font-weight:600;white-space:nowrap}
+.pill.look.on,.pill.look:hover{border-color:var(--cyn);color:var(--cyn)}
+.pill.ok.on,.pill.ok:hover{border-color:var(--grn);color:var(--grn)}
+.pill.bad.on,.pill.bad:hover{border-color:#ff5a45;color:#ff8a80}
+.pill.err.on,.pill.err:hover{border-color:#e3a42b;color:#ffc861}.pill.on{background:#0b1114}
+.ib{height:34px;min-width:36px;padding:0 8px;border:1px solid var(--edge);border-radius:4px;background:#1a2025;font-size:16px;font-weight:700}
+.ib.g:hover,.ib.g.on{border-color:var(--grn);color:var(--grn)}
+.ib.r:hover,.ib.r.on{border-color:#ff5a45;color:#ff8a80}
+.ib:hover{border-color:var(--gold)}
+.cki{display:flex;gap:8px;margin-top:10px}
+.cki input{flex:1;min-height:40px;border:1px solid var(--edge);border-radius:4px;background:#0c1013;padding:8px 10px;font-size:15px}
+.cki .btn{height:40px}
+ul.plain{columns:2 20em}
+details.what{margin-top:12px}
+details.what summary{cursor:pointer;color:var(--gold);font-weight:600}
+.iss{margin:0 0 26px;padding:16px 18px;background:linear-gradient(180deg,rgba(26,32,37,.92),rgba(12,16,19,.95));border:1px solid var(--edge);border-radius:6px}
+.iss:empty{display:none}
+.iss h3{margin:0 0 10px;font:700 28px/1 "Barlow Condensed",sans-serif}
+.iss .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:14px 20px}
+.iss h4{margin:0 0 6px;font:700 19px/1 "Barlow Condensed",sans-serif;letter-spacing:.03em;padding-bottom:6px;border-bottom:2px solid var(--edge)}
+.iss h4 span{color:var(--mut)}.iss h4.x{border-color:#e5392a}.iss h4.f{border-color:var(--gold)}.iss h4.l{border-color:var(--cyn)}.iss h4.g{border-color:var(--grn)}
+.iss ul{list-style:none;margin:0;padding:0;max-height:300px;overflow:auto}
+.iss li button{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid rgba(59,70,77,.6);padding:6px 2px;font-size:14px;line-height:1.35}
+.iss li button:hover{background:rgba(255,191,63,.07)}
+.iss em{font-style:normal;color:var(--gold);font-weight:600;margin-right:4px}
+.iss small{display:block;color:var(--mut)}
+@media(max-width:760px){.ck li{grid-template-columns:30px minmax(0,1fr)}.cka{grid-column:1/-1;align-items:flex-start}.grp{justify-content:flex-start}.mk{width:28px;height:28px;font-size:16px}}
+@media print{.iss{display:none!important}.pc .st{font-weight:700}.pc .st.ok{color:#1d7a32}.pc .st.bad{color:#b3261e}.pc ul{list-style:none;padding-left:0}}
+.who{gap:10px}.who b{font:600 15px/1 Barlow,sans-serif;max-width:220px;overflow:hidden;text-overflow:ellipsis}
+.tmh{margin:4px 0 6px;font:700 18px/1 "Barlow Condensed",sans-serif}
+.tm{list-style:none;margin:0;padding:0;border-top:1px solid var(--edge)}
+.tm li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--edge);flex-wrap:wrap}
+.tm em{font-style:normal;color:var(--gold);font-size:13px;margin-left:6px}
+@media(prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important}}
+@media print{@page{size:letter;margin:12mm}body{background:#fff;color:#111}.bg,.stage,.panel,.chips,.edbar,dialog,.msg{display:none!important}.brand b{color:#111;background:none}.brand small{color:#333}.plist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.pc{break-inside:avoid;border:1px solid #bbb;border-radius:4px;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact}.pc img{width:100%;aspect-ratio:16/9;object-fit:cover}.pc div{padding:8px 10px;font-size:10pt}.pc h4{margin:0;font:700 16pt/1.1 "Barlow Condensed",sans-serif}.pc em{font-style:normal;color:#8a5a00;font-weight:600}.pc ul{margin:4px 0 0;padding-left:16px}.foot{color:#333}.foot h3{color:#111}}
+</style></head><body><div id="root"></div><script type="application/json" id="data">{"meta":{"title":"Modern F-15E Roadmap","founded":"March 2026","current":"2.6.9","builds":155,"updated":"2026-11-26","note":"Built from the 2.6.9 user guide, the updater logs on this PC (1.47.6 to 2.6.11) and the team's dev notes. Labels marked 'by' give the first build seen with the feature. All photos are U.S. military, public domain, from Wikimedia Commons."},"tiles":[{"id":"start","kind":"start","title":"Modern F-15E founded","ver":"March 2026","tag":"","cat":"Milestone","img":"patrol","img2":"","summary":"The team sets out to give the DCS Strike Eagle the modern avionics and weapons the real jet carries, without breaking the integrity check.","details":["Mod founded in March 2026","Tray app and in-memory hook: no DCS or Razbam files changed by default","Public on GitHub from July 2026"],"source":"Team founding date; GitHub repository created 6 July 2026.","checks":["Tray app installs and starts","Updater installs new builds (Stable, Preview, tester)","DCS passes the integrity check with default settings","Hook loads: WDL_Overlay loaded in modernf15e.log","No DCS or Razbam files changed after an update"]},{"id":"sit","kind":"shipped","title":"SIT page","ver":"Foundation","tag":"New display","cat":"Avionics","img":"cockpit","img2":"","summary":"A live situational-awareness page on any MPD or MPCD: contacts, threat rings, a slewable cursor, range and bullseye.","details":["Suite 9 main page with DONOR, CTN track search, JIN and RCD keys","Decentered, centered, expanded and formation formats","Lat/long or MGRS of any hooked object, with elevation","SAM and EWR threat rings, grey when not emitting, also on the TSD","Each seat keeps its own cursor, range and format"],"source":"User guide 2.6.9, sections 4, 5 and 12.","checks":["SIT page opens on every MPD and MPCD","DONOR, CTN track search, JIN and RCD keys","Decentered, centered, expanded and formation formats","Cursor slews and hooks contacts","Hooked object shows lat/long or MGRS with elevation","SAM and EWR rings, grey when not emitting","Threat rings also show on the TSD","Each seat keeps its own cursor, range and format"]},{"id":"l16","kind":"shipped","title":"Link 16 datalink","ver":"Foundation","tag":"New datalink","cat":"Avionics","img":"awacs","img2":"","summary":"Flight members, donors, PPLIs and AWACS tracks through the jet's JTIDS knob, with lock lines and shared designations.","details":["JTIDS knob OFF, POLL, NORM, SIL and HOLD","About 300 nm line of sight; an AWACS extends coverage","Flight members by IFF Mode 2 code or F-16 / F/A-18 STN","Tracks correlate with TWS and RWS targets on the A/A radar","Lock lines, A/G designations and markpoint XMIT to the flight","Each member's weapons count and fuel"],"source":"User guide 2.6.9, sections 6 to 8.","checks":["JTIDS knob OFF, POLL, NORM, SIL and HOLD","Flight members appear by IFF Mode 2 code","F-16 / F/A-18 members by STN","AWACS tracks and extended coverage","Tracks correlate with TWS and RWS targets","Lock lines shown to the flight","A/G designations and markpoint XMIT","Each member's weapons count and fuel"]},{"id":"hmd","kind":"shipped","title":"Helmet-mounted display","ver":"by 2.0.40","tag":"New avionics","cat":"Avionics","img":"jhmcs_us","img2":"","summary":"The tactical picture on the visor, on a monitor, with TrackIR or in VR, with line-of-sight cueing for the pod and radar.","details":["Air contacts from radar, the flight and donors","Designations from ownship, flight and TGP","A/G: Coolie DOWN slews the TGP to the HMD cross","A/A: off-boresight BST, LR BST and Supersearch","AVNCS panel knob for power and brightness","Front seat only"],"source":"User guide 2.6.9, section 11; README, 24 Oct 2026.","checks":["HMD shows on a monitor, with TrackIR and in VR","Air contacts from radar, the flight and donors","Designations from ownship, flight and TGP","A/G: Coolie DOWN slews the TGP to the HMD cross","A/A: BST, LR BST and Supersearch","AVNCS knob sets power and brightness","Front seat only: the WSO sees no HMD"]},{"id":"sdb","kind":"shipped","title":"GBU-39/B SDB","ver":"2.0","tag":"New weapon","cat":"Weapons","img":"sdb","img2":"sdb2","summary":"Up to 20 Small Diameter Bombs on BRU-61/A racks, every bomb with its own target, a long glide and a steep dive.","details":["4 on the centreline, 2 racks of 4 on each CFT","SW page: XFR, NXT STA and NXT WPN target each bomb","Beyond 9 nm it glides at about 4 degrees, then dives from 8 nm","TERM ANG 30 to 90 degrees per rack, 75 at load","Roll and wing deployment after release; CFT release fixed","Multiplayer uses the ModernF15E_SDB object and SDB mod","Models by AsilTurq"],"source":"User guide 2.6.9, sections 10 and 18; SDB mod version 2.0.0.","checks":["4 on the centreline, 2 racks of 4 on each CFT","XFR, NXT STA and NXT WPN target each bomb","Glides beyond 9 nm, dives from 8 nm","TERM ANG 30 to 90 per rack, 75 at load","Roll and wing deployment after release","CFT release","Multiplayer: other players see the bombs (ModernF15E_SDB)"]},{"id":"sniper","kind":"wip","title":"Sniper ATP","ver":"by 2.3.47","tag":"New pod","cat":"Sensors","img":"sniper_f15e","img2":"sniper_pod","summary":"The AN/AAQ-33 on station 7 with IR and TV, Z2 to Z16 zoom, XR, picture-in-picture and hybrid image.","details":["IR WFOV 3.6, NFOV 1.0, XR 0.33 degrees; TV 0.5, XR 0.165","Warm-up countdown, then FLIR cool-down","XR with image processing; PIP; HYBD blends IR and TV","Link 16 designation triangles on the pod image","Marked work in progress in the guide"],"source":"User guide 2.6.9, section 9.","checks":["Pod on station 7 warms up with a countdown","IR WFOV, NFOV and XR","TV and TV XR","Z2 to Z16 zoom","XR image processing","PIP and HYBD (IR and TV blend)","FLIR cool-down","Link 16 designation triangles on the pod image"]},{"id":"litening","kind":"wip","title":"Litening AT","ver":"by 2.3.47","tag":"New pod","cat":"Sensors","img":"litening","img2":"","summary":"The AN/AAQ-28 with weapon keys, targets of opportunity, spot tracker, laser marker and auto-lase.","details":["Built-in test at power-up","XFR, NXT STA, NXT WPN, TOO and WHT on the TGP page","Box several targets and hand them to weapons in order","LST, laser marker and ALAS / MLAS auto-lase","Grayscale TV, as on the LITENING AT in USAF service","Not every function works yet"],"source":"User guide 2.6.9, section 9.","checks":["Built-in test at power-up","XFR, NXT STA and NXT WPN on the TGP page","TOO and WHT","Box several targets and hand them off in order","LST spot tracker","Laser marker","ALAS / MLAS auto-lase","Grayscale TV"]},{"id":"aim9x","kind":"shipped","title":"AIM-9X","ver":"by 2.3.47","tag":"New weapon","cat":"Weapons","img":"aim9x_usaf","img2":"aim9x_f15","summary":"The AIM-9X on the Strike Eagle, cued off-boresight from the HMD.","details":["Tray option Enable 9X (breaks IC)","Counted with the Sidewinders in the flight data (9X included)","Pairs with HMD off-boresight cueing in A/A"],"source":"Tray settings, 4 Nov 2026; user guide 2.6.9, section 7.","checks":["Enable 9X tray option loads the AIM-9X","AIM-9X counted with the Sidewinders in flight data","HMD off-boresight cueing in A/A","Missile guides off-boresight and hits"]},{"id":"jhmcs","kind":"shipped","title":"JHMCS helmet","ver":"2.4","tag":"New helmet","cat":"Helmet","img":"jhmcs_small","img2":"","summary":"The pilot wears the JHMCS, and the visor and NVGs move on the helmet with the hand reaching up.","details":["JHMCS front module, side mounts and display visor on the pilot","WSO keeps the standard visor","Shift+N moves visor or NVGs, seen by other players","Ground Crew can swap the helmet-mounted device","Helmet animation built in from 9 Nov 2026"],"source":"User guide 2.6.9, section 11.","checks":["JHMCS front module, mounts and visor on the pilot","WSO keeps the standard visor","Shift+N moves the visor","Shift+N moves the NVGs","Other players see the visor and NVG moves","Hand reaches up during the animation","Ground Crew swaps the helmet-mounted device"]},{"id":"cbu","kind":"shipped","title":"CBU-103 / CBU-105","ver":"in 2.6.9","tag":"New weapon","cat":"Weapons","img":"cbu","img2":"","summary":"Wind-corrected cluster bombs with their own targets, AUTO release, auto loft and burst height.","details":["Each WCMD guides to the target transferred to it","AUTO release inside the zone, with an optional DGR","AUTO loft 1 to 45 degrees","Burst height from the FUZE page; CBU-105 minimum 700 ft"],"source":"User guide 2.6.9, section 10.","checks":["CBU-103 and CBU-105 load","Each WCMD guides to its transferred target","AUTO release inside the zone","Optional DGR","AUTO loft 1 to 45 degrees","Burst height from the FUZE page","CBU-105 minimum 700 ft"]},{"id":"dtm","kind":"shipped","title":"DTM cartridges","ver":"in 2.6.9","tag":"New avionics","cat":"Avionics","img":"wso_dtm","img2":"","summary":"Plan in the DTM Mission Planner or DCS-DTC, then load routes, radios, displays, JDAM targets and drawings from the cockpit.","details":["Import a DCS-DTC share string, a .json file or DCS-DTC presets","Three routes, radios, display programs, MISC, SMART and drawings","Loads are cumulative: only boxed parts change","Planner runs without DCS and follows a running mission"],"source":"User guide 2.6.9, section 13.","checks":["Import a DCS-DTC share string","Import a .json file","Import DCS-DTC presets","Three routes load","Radios load","Display programs, MISC and SMART load","Drawings load","Only boxed parts change (cumulative loads)","Planner works without DCS","Planner follows a running mission"]},{"id":"ufc","kind":"shipped","title":"Digital UFC","ver":"in 2.6.9","tag":"New cockpit","cat":"Cockpit","img":"ufc","img2":"","summary":"A digital up-front controller in the cockpit on every livery, switched from the tray.","details":["Digital UFC by Sharklett and Tholozor","Shown on every livery","Switch it with DCS closed"],"source":"User guide 2.6.9, section 3.","checks":["Digital UFC shows in the cockpit","Shows on every livery","Switching it with DCS closed takes effect"]},{"id":"cur","kind":"current","title":"Version 2.6.9","ver":"2.6.9","tag":"","cat":"Milestone","img":"hero","img2":"","summary":"Where the mod stands today: 155 builds since 1.47.6 and a 67-page user guide.","details":["155 builds installed on this PC from 1.47.6 to 2.6.9","User guide 2.6.9: 18 sections, 67 pages","Stable, Preview and tester channels"],"source":"Updater logs; user guide 2.6.9.","checks":["Update to 2.6.9 installs cleanly","Stable, Preview and tester channels switch","User guide 2.6.9 matches the build","No new errors in dcs.log after a flight"]},{"id":"sdbsrc","kind":"planned","title":"SDB roll in source","ver":"Next","tag":"","cat":"Weapons","img":"sdb2","img2":"","summary":"Move the GBU-39 roll fix into the loader source so updates stop undoing it.","details":["Today the roll needs an 11-byte loader patch","Every Modern F-15E update overwrites it"],"source":"Our SDB notes, 7 Nov 2026.","checks":["Roll works without the loader patch","Roll survives a Modern F-15E update"]},{"id":"declutter","kind":"planned","title":"SIT declutter","ver":"Next","tag":"","cat":"Avionics","img":"maneuver","img2":"","summary":"TDC transducer toggles SIT declutter; the pilot HOTAS kneeboard marks it planned.","details":["Pilot SIT HOTAS kneeboard: TDC transducer, Declutter on / off, Planned"],"source":"Kneeboard 900, SIT HOTAS pilot.","checks":["Pilot SIT HOTAS: TDC transducer","Declutter on / off"]}],"credits":{"patrol":{"who":"U.S. Air Force photo, Staff Sgt. Aaron Allmon","url":"https://commons.wikimedia.org/wiki/File:F-15E_on_patrol_over_Afghanistan_-_081107-F-7823A-141.jpg"},"cockpit":{"who":"U.S. Air Force photo, Tech. Sgt. Hans Deffner","url":"https://commons.wikimedia.org/wiki/File:F-15E_cockpit_view_from_tanker.jpg"},"awacs":{"who":"U.S. Air Force photo, 1st Lt. Kinder Blacke","url":"https://commons.wikimedia.org/wiki/File:Boeing_E-3_Sentry_090512-F-7550B-902.jpg"},"jhmcs_us":{"who":"U.S. Air Force photo, SSgt David Dobrydney (helmet-mounted cueing test, Bagram)","url":"https://commons.wikimedia.org/wiki/File:U.S._Air_Force_Senior_Airman_Dieri_Dieujuste,_an_aircrew_flight_equipment_technician_with_the_74th_Expeditionary_Fighter_Squadron,_tests_a_Scorpion_helmet_mounted_integrated_targeting_system_at_Bagram_Airfield_130429-F-ZX232-013.jpg"},"sdb":{"who":"U.S. Air Force photo, Master Sgt. Lance Cheung","url":"https://commons.wikimedia.org/wiki/File:SDB3.jpg"},"sdb2":{"who":"U.S. Air Force photo, Senior Airman Ricky Best","url":"https://commons.wikimedia.org/wiki/File:061004-F-5420B-0030.jpg"},"sniper_f15e":{"who":"U.S. Air Force photo","url":"https://commons.wikimedia.org/wiki/File:F-15E_with_Sniper_pod.jpg"},"sniper_pod":{"who":"U.S. Air Force photo, Staff Sgt. Darnell Cannady","url":"https://commons.wikimedia.org/wiki/File:Sniper_Advanced_Targeting_Pod.jpg"},"litening":{"who":"U.S. Air Force photo, Samuel King Jr.","url":"https://commons.wikimedia.org/wiki/File:130110-f-oc707-000_Female_A-10_Thunderbolt_II_Pilot_Maj._Olivia_Elliott_examines_the_LITENING_advanced_targeting_pod.jpg"},"aim9x_usaf":{"who":"U.S. Air Force photo, SSgt Adrian Cadiz","url":"https://commons.wikimedia.org/wiki/File:US_Air_Force_DF-SD-06-00578_Airman_prepare_to_load_a_new_Raytheon_AIM-9x_Sidewinder_missile_onto_a_USAF_F-15C_Eagle.JPEG"},"aim9x_f15":{"who":"U.S. Air Force photo, Tech. Sgt. Keith Brown","url":"https://commons.wikimedia.org/wiki/File:Airman_1st_Class_AJ_McGee_removes_the_raydome_cover_off_an_AIM-9X_Sidewinder_on_an_F-15C_Eagle_prior_to_takeoff.JPG"},"jhmcs_small":{"who":"U.S. military photo, Joint Helmet Mounted Cueing System","url":"https://commons.wikimedia.org/wiki/File:Joint_Helmet_Mounted_Cueing_System.jpg"},"cbu":{"who":"U.S. Air Force photo, Airman 1st Class Luke Hill (CBU-103, Barksdale AFB)","url":"https://commons.wikimedia.org/wiki/File:2nd_Maintenance_Group_Load_Crew_of_the_Quarter_150710-F-PQ438-290.jpg"},"wso_dtm":{"who":"U.S. Air Force photo, SSgt Michael Means","url":"https://commons.wikimedia.org/wiki/File:An_unidentified_U.S._Air_Force_weapons_systems_officer_assigned_to_the_335th_Expeditionary_Fighter_Squadron_climbs_out_of_the_back_seat_of_an_F-15E_Strike_Eagle_aircraft_after_completing_his_1,000th_combat_140113-F-XR500-203.jpg"},"ufc":{"who":"U.S. Air Force photo, Tech. Sgt. Rose Reynolds","url":"https://commons.wikimedia.org/wiki/File:F-15E_Cockpit_Cleaning.jpg"},"hero":{"who":"U.S. Air Force photo, Staff Sgt. Aaron Allmon","url":"https://commons.wikimedia.org/wiki/File:F-15E_Strike_Eagle_over_Afghanistan.jpg"},"maneuver":{"who":"U.S. Air Force photo, Airman 1st Class Madeline Herzog","url":"https://commons.wikimedia.org/wiki/File:An_F-15E_Strike_Eagle_assigned_to_the_492nd_Fighter_Squadron_performs_a_flight_maneuver_above_RAF_Lakenheath,_United_Kingdom,_April_15,_2020.jpg"}},"imgmap":{"patrol":"/_blob/af6ca4c698be027da804eb4ba4636d69","cockpit":"/_blob/77abe65e90d01a6a438e847e11b406b8","awacs":"/_blob/79756917612397536eaccf384d0f8946","jhmcs_us":"/_blob/6dc46f809167330ec8b996a5cbce6e1b","sdb":"/_blob/53ac6c8b857675bcc7edec3dd730b1c3","sdb2":"/_blob/1b11e0ffb8fcb1b20908c8b041d90b3b","sniper_f15e":"/_blob/160decf6cecdae3243c55ead1d0f4cbb","sniper_pod":"/_blob/87a5f4d699bea0b9ee956d9115a7b17e","litening":"/_blob/4c6c8b8d5a6e2cadea6c9ca39158ba9e","aim9x_usaf":"/_blob/cba26f99304d1435cd9b29ee7c0f6ab9","aim9x_f15":"/_blob/48400e4af2b33346adc9e67d06959d25","jhmcs_small":"/_blob/c966810a7256e2e95d4bf6b46e5a08d2","cbu":"/_blob/cd3dcea76b2977fe2061284599750dde","wso_dtm":"/_blob/ad1d0041240558c3482635e78c1b2bcd","ufc":"/_blob/fdf91ac8ba83be2aca26c88083d23ba3","hero":"/_blob/c81a7e8d1a8433ecdefba53a734c3d30","maneuver":"/_blob/6d3de16d8fd1c44211751adc47194eb0"}}</script><script id="main">{
+const HEAD='<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Modern F-15E Roadmap</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;1,700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">';
+const LOCAL=location.protocol==='file:',KEY='mf15e-hexmap-v1';
+const KIND={start:'Start',shipped:'Online',wip:'In work',current:'Current build',planned:'Planned'};
+const BAN={start:'Founded',shipped:'Sector online',wip:'Sector in work',current:'Current build',planned:'Sector locked'};
+const CATS=['Avionics','Sensors','Weapons','Helmet','Cockpit','Milestone'];
+const root=document.getElementById('root');
+let S=JSON.parse(document.getElementById('data').textContent);
+let sel=null,edit=false,art=null,assets=null,readOnly=false,undo=[],msg='',ro=null;
+if(LOCAL)try{const o=JSON.parse(localStorage.getItem(KEY)||'null');if(o&&Array.isArray(o.tiles)&&o.meta.updated>=S.meta.updated)S=o}catch(e){}
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const src=k=>{if(!k)return'';k=String(k);if(k.startsWith('photo:'))return PHOTOS[k.slice(6)]||'';if(k.startsWith('/_blob/'))return '';return 'img/'+k+'.jpg'};
+const T=()=>S.tiles,idx=id=>T().findIndex(t=>t.id===id),curI=()=>T().findIndex(t=>t.kind==='current');
+{const c=T().find(t=>t.kind==='current');sel=c?c.id:(T()[0]||{}).id}
+function credit(k){const c=S.credits[k];if(!c)return /^(\/_blob\/|photo:)/.test(String(k))?'Team upload':'';return c.url?esc(c.who)+', public domain, <a href="'+esc(c.url)+'" target="_blank" rel="noopener">Wikimedia Commons</a>':esc(c.who)}
+function seeded(n){let s=n;return()=>(s=s*16807%2147483647)/2147483647}
+function svgUrl(w,h,body){return 'url("data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'">'+body+'</svg>')+'")'}
+function topo(){const P=640,R=seeded(11);let p='';for(let c=0;c<7;c++){const cx=R()*P,cy=R()*P,n=4+(R()*6|0),b=16+R()*22,a1=R()*6.3,a2=R()*6.3;for(let k=1;k<=n;k++){const r=k*b;let d='';for(let a=0;a<=40;a++){const t=a/40*6.2832,rr=r*(1+.13*Math.sin(3*t+a1)+.07*Math.sin(5*t+a2));d+=(a?'L':'M')+(rr*Math.cos(t)).toFixed(1)+' '+(rr*Math.sin(t)).toFixed(1)}const e=r*1.25;for(const ox of[-P,0,P])for(const oy of[-P,0,P]){const x=cx+ox,y=cy+oy;if(x+e<0||x-e>P||y+e<0||y-e>P)continue;p+='<path transform="translate('+x.toFixed(1)+' '+y.toFixed(1)+')" d="'+d+'Z"/>'}}}return svgUrl(P,P,'<g fill="none" stroke="#d08a3c" stroke-opacity=".2">'+p+'</g>')}
+function lights(seed,n){const P=512,R=seeded(seed);let p='';for(let i=0;i<n;i++){const x=R()*P,y=R()*P,r=.6+R()*1.6,c=R()<.6?'#ff5a2a':R()<.5?'#ffbf3f':'#cfe8ff';p+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="'+c+'" fill-opacity="'+(.25+R()*.6).toFixed(2)+'"/>'}return svgUrl(P,P,p)}
+const HEXG=svgUrl(60,104,'<path d="M30 0L60 17.32V51.96L30 69.28L0 51.96V17.32ZM30 69.28V104" fill="none" stroke="#7ed68e" stroke-opacity=".22"/>');
+const SITP={fl:'M200 150C600 40 1100 60 1450 180S1560 700 1250 880S400 960 180 760S0 260 200 150Z',cap:'M60 240V400A60 60 0 0 0 180 400V240A60 60 0 0 0 60 240Z',cap2:'M1420 300V470A55 55 0 0 0 1530 470V300A55 55 0 0 0 1420 300Z',aw:'M1150 40H1440A30 30 0 0 1 1440 100H1150A30 30 0 0 1 1150 40Z',r1:'M1750 40C1400 90 1100 130 800 120C500 110 200 60 -150 120',r2:'M-150 1000C100 880 260 700 230 520C200 340 80 200 -150 150',r3:'M1750 1000C1600 860 1520 720 1470 580C1420 440 1500 260 1750 120',r4:'M-150 760C80 700 200 560 250 420C290 300 200 150 -150 60',gt:'M-150 60C150 150 220 400 130 600C60 760 150 900 -150 1060',gt2:'M1750 420C1520 330 1420 220 1320 80C1270 10 1220 -50 1150 -150',gt3:'M1750 -120C1580 140 1460 330 1500 540C1540 720 1680 840 1800 950',un:'M1330 -80C1250 300 1420 700 1300 1080',road:'M-120 975C0 950 90 905 170 880C250 855 330 820 420 780',sea:'M150 70C230 40 320 70 315 120C310 165 220 180 150 160C80 140 70 100 150 70Z'};
+function tsdChart(){const R=seeded(23),rn=(a,b)=>a+R()*(b-a),f=n=>n.toFixed(0);
+ const md=(a,b,d,amp)=>{if(!d)return[a];const m=[(a[0]+b[0])/2+rn(-amp,amp),(a[1]+b[1])/2+rn(-amp,amp)];return md(a,m,d-1,amp*.55).concat(md(m,b,d-1,amp*.55))};
+ const jag=(pts,d,amp)=>{let o=[];for(let i=0;i<pts.length-1;i++)o=o.concat(md(pts[i],pts[i+1],d,amp));o.push(pts[pts.length-1]);return o};
+ const P=a=>'M'+a.map(p=>f(p[0])+' '+f(p[1])).join('L');
+ const blob=(cx,cy,r,n)=>{const a=[];for(let i=0;i<n;i++){const t=i/n*6.2832,rr=r*rn(.65,1.25);a.push([cx+Math.cos(t)*rr,cy+Math.sin(t)*rr*rn(.6,1)])}return P(jag(a.concat([a[0]]),2,r*.12))+'Z'};
+ const isLand=(x,y)=>y>690-1.04*(x+80)+30;
+ const coast=jag([[-120,700],[60,650],[180,560],[230,470],[300,390],[360,300],[470,230],[540,140],[600,60],[680,-120]],4,30);
+ let s='<rect x="-120" y="-120" width="1840" height="1240" fill="#4d7ba3"/>';
+ s+='<path d="'+P(coast)+'L1720 -120L1720 1120L-120 1120Z" fill="#6c8a52"/>';
+ s+='<path d="'+blob(330,95,55,9)+'" fill="#7f9a5e"/><path d="'+blob(60,140,30,8)+'" fill="#7f9a5e"/>';
+ s+='<path d="'+P(coast)+'" fill="none" stroke="#e8e3b0" stroke-width="3" stroke-opacity=".35"/>';
+ const tc=['#5c7a45','#83a061','#94a96a','#ad9f6c','#53703c','#9c8f5f'];for(let i=0;i<34;i++){let x,y;do{x=rn(0,1600);y=rn(0,1000)}while(!isLand(x,y));s+='<path d="'+blob(x,y,rn(40,130),10)+'" fill="'+tc[i%tc.length]+'" fill-opacity=".55"/>'}
+ for(let i=0;i<14;i++){let x,y;do{x=rn(0,1600);y=rn(0,1000)}while(!isLand(x,y));const r=rn(30,80);s+='<g fill="none" stroke="#4a5f35" stroke-opacity=".55"><path d="'+blob(x,y,r,9)+'"/><path d="'+blob(x+4,y+3,r*.6,8)+'"/></g>'}
+ const walk=(x,y,n,step,dir,spread)=>{const a=[[x,y]];let h=dir;for(let i=0;i<n;i++){h+=rn(-spread,spread);x+=Math.cos(h)*step;y+=Math.sin(h)*step;a.push([x,y])}return a};
+ for(let i=0;i<4;i++){const x=rn(700,1500),y=rn(300,1000);s+='<path d="'+P(walk(x,y,22,30,Math.atan2(-y+200,-x+300),.5))+'" fill="none" stroke="#3f74b0" stroke-width="2" stroke-opacity=".8"/>'}
+ for(let i=0;i<8;i++){const x=rn(400,1600),y=rn(250,1000);s+='<path d="'+P(walk(x,y,28,40,rn(0,6.28),.35))+'" fill="none" stroke="#7a2620" stroke-width="1.8" stroke-opacity=".75"/>'}
+ s+='<path d="M380 1100L520 820L760 640L1040 520L1320 380L1720 260" fill="none" stroke="#2b2b2b" stroke-width="5" stroke-opacity=".5"/><path d="M380 1100L520 820L760 640L1040 520L1320 380L1720 260" fill="none" stroke="#d8c27a" stroke-width="2" stroke-opacity=".6"/>';
+ for(let i=0;i<16;i++){let x,y;do{x=rn(0,1600);y=rn(0,1000)}while(!isLand(x,y));const r=rn(5,13);s+='<path d="'+blob(x,y,r,7)+'" fill="#e3cf86" stroke="#4a3b1c" stroke-width="1" fill-opacity=".85"/>'}
+ [[780,420],[1260,760]].forEach(([x,y])=>{s+='<g stroke="#1d3c78" stroke-width="2.5" fill="none" opacity=".8"><circle cx="'+x+'" cy="'+y+'" r="11"/><path d="M'+(x-9)+' '+(y+7)+'L'+(x+9)+' '+(y-7)+'"/></g>'});
+ [['M900 520L1180 470L1260 640L1120 760L880 700Z','44',1075,640],['M1180 60L1450 40L1560 260L1380 330L1220 250Z','12',1370,190],['M-40 270L170 230L250 420L120 520L-40 470Z','17',95,390]].forEach(([d,l,x,y])=>{s+='<path d="'+d+'" fill="none" stroke="#1c3a6e" stroke-width="7" stroke-opacity=".5"/><path d="'+d+'" fill="none" stroke="#1c3a6e" stroke-width="1.5" stroke-dasharray="10 6" stroke-opacity=".8" transform="translate(0 0)"/><text x="'+x+'" y="'+y+'" text-anchor="middle" font-size="78" font-weight="700" fill="#1c3a6e" fill-opacity=".55">'+l+'</text>'});
+ let g='';for(let i=-1;i<8;i++){const x=i*240+40;g+='<path d="M'+x+' -120L'+(x+70)+' 1120"/>'}for(let j=0;j<6;j++){const y=j*220+40;g+='<path d="M-120 '+y+'L1720 '+(y-60)+'"/>'}
+ s+='<g stroke="#13202b" stroke-width="1.3" stroke-opacity=".6" fill="none">'+g+'</g><g fill="#13202b" fill-opacity=".7" font-size="20" font-weight="700"><text x="300" y="470">25°</text><text x="1018" y="245">56°</text><text x="770" y="905">25°</text></g>';
+ return s+'<rect x="-120" y="-120" width="1840" height="1240" fill="#04070a" opacity=".52"/>'}
+function sitLayer(){const A='#ffd60a',RD='#ff3b30',W='#e8eef0',GR='#8a949a';const st=c=>' fill="none" stroke="'+c+'" stroke-width="2.5"';
+ const sam=(x,y,r,c,l,p)=>'<circle cx="'+x+'" cy="'+y+'" r="'+r+'"'+st(c)+'>'+(p?'<animate attributeName="stroke-opacity" values=".45;1;.45" dur="'+p+'s" repeatCount="indefinite"/>':'')+'</circle><circle cx="'+x+'" cy="'+y+'" r="13" fill="none" stroke="'+c+'" stroke-width="1.5"/><text x="'+x+'" y="'+(y+7)+'" text-anchor="middle" fill="'+c+'" font-size="20">'+l+'</text>';
+ let s='<defs>'+Object.entries(SITP).map(([k,d])=>'<path id="sp-'+k+'" d="'+d+'"/>').join('')+'</defs><g class="pan">'+tsdChart()+'<g class="sym">';
+ s+='<g stroke="'+W+'" stroke-opacity=".5" fill="none"><circle cx="110" cy="590" r="35"/><circle cx="110" cy="590" r="70"/><circle cx="110" cy="590" r="105" stroke-dasharray="4 6"/><path d="M110 470V710M0 590H220"/></g>';
+ s+=sam(1490,190,125,A,'10',5)+sam(140,880,95,A,'11',4)+sam(1490,780,60,GR,'S',0)+sam(1520,610,70,RD,'6',2.5);
+ s+='<path d="M880 175L1000 145L1110 180L1210 140L1290 175"'+st(W)+' stroke-opacity=".7" stroke-dasharray="6 6"/><circle cx="880" cy="175" r="14"'+st(W)+'/><circle cx="1000" cy="145" r="9"'+st(W)+'/><circle cx="1110" cy="180" r="9"'+st(W)+'/><rect x="1201" y="131" width="18" height="18"'+st(W)+'/><path d="M1290 163L1301 183H1279Z"'+st(W)+'/>';
+ return '<svg class="sit" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">'+s+'<g id="sit-dyn"></g></g></g></svg>'}
+const SIT=sitLayer();
+let sitRaf=0;
+function sitRun(){cancelAnimationFrame(sitRaf);const svg=root.querySelector('.sit');if(!svg)return;const dyn=svg.querySelector('#sit-dyn');const p0=svg.querySelector('#sp-fl');if(!dyn||!p0||!p0.getTotalLength)return;
+ const CYC=90,FPS=30,DT=1/FPS,N=CYC*FPS,PI=Math.PI,TAU=2*PI,C={G:'#46e06a',R:'#ff3b30',Y:'#ffd60a',C:'#4fd8ff',B:'#3d8bff',W:'#e8eef0'};
+ const PT={};for(const k in SITP){const el=svg.querySelector('#sp-'+k),L=el.getTotalLength(),n=Math.max(2,Math.ceil(L/2)),xs=new Float32Array(n+1),ys=new Float32Array(n+1);for(let i=0;i<=n;i++){const q=el.getPointAtLength(L*i/n);xs[i]=q.x;ys[i]=q.y}PT[k]={xs,ys,n,L,closed:/Z$/.test(SITP[k])}}
+ const clamp=x=>Math.max(0,Math.min(1,x)),ss=(a,b,x)=>{const k=clamp((x-a)/(b-a));return k*k*(3-2*k)},wrap=a=>((a%TAU)+3*PI)%TAU-PI,la=(a,b,k)=>a+wrap(b-a)*k;
+ function at(k,u){const p=PT[k];let v=p.closed?((u%1)+1)%1:clamp(u);const f=v*p.n,i=Math.min(p.n-1,Math.floor(f)),r=f-i;const x=p.xs[i]+(p.xs[i+1]-p.xs[i])*r,y=p.ys[i]+(p.ys[i+1]-p.ys[i])*r;const a=Math.max(0,i-2),b=Math.min(p.n,i+3);return{x,y,h:Math.atan2(p.ys[b]-p.ys[a],p.xs[b]-p.xs[a])}}
+ function carrot(g,u,look){const p=PT[g.path];if(p.closed||u+look<=1)return at(g.path,u+look);const e=at(g.path,1),ex=(u+look-1)*p.L;return{x:e.x+Math.cos(e.h)*ex,y:e.y+Math.sin(e.h)*ex,h:e.h}}
+ const sp=30,F={echR:[[0,0],[-sp,sp],[-2*sp,2*sp],[-3*sp,3*sp]],echL:[[0,0],[-sp,-sp],[-2*sp,-2*sp],[-3*sp,-3*sp]],finger:[[0,0],[-sp,-sp],[-sp,sp],[-2*sp,2*sp]],wedge:[[0,0],[-sp*1.1,-sp*1.1],[-sp*1.1,sp*1.1]],abreast:[[0,0],[0,sp*1.4]]};
+ const CYCLEF=['echR','finger','echL','finger'];
+ const groups=[
+  {path:'fl',period:90,n:4,kind:'flight',side:'F',form:'cycle',alt:'25',shots:1,range:330,shooters:[0,1]},
+  {path:'cap',period:30,n:4,kind:'fr',side:'F',form:'echL',alt:'30',shots:1,range:300},
+  {path:'aw',period:45,n:1,kind:'fr',dot:1,side:'N',alt:'32'},
+  {path:'sea',period:45,n:3,kind:'ship',trail:.33,side:'N'},
+  {path:'cap2',period:30,n:1,kind:'ppli',side:'F',alt:'22',shots:1,range:240},
+  {path:'cap2',period:30,n:1,kind:'donor',ph:.5,side:'F',alt:'24',shots:1,range:240},
+  {path:'r1',t0:14,dur:48,n:3,kind:'ho',side:'H',form:'wedge',alt:'31',shots:1,range:240},
+  {path:'r3',t0:30,dur:40,n:1,kind:'ho',side:'H',alt:'20',shots:1,range:200},
+  {path:'r2',t0:40,dur:42,n:2,kind:'ho',side:'H',form:'abreast',alt:'12',shots:1,range:200,shooters:[1]},
+  {path:'gt',t0:30,dur:46,n:2,kind:'fr',side:'F',form:'abreast',alt:'27',shots:1,range:240,shooters:[0]},
+  {path:'gt2',t0:52,dur:26,n:2,kind:'fr',side:'F',form:'echR',alt:'22'},
+  {path:'r4',t0:60,dur:27,n:2,kind:'ho',side:'H',form:'echR',alt:'18',shots:1,range:220,shooters:[0]},
+  {path:'gt3',t0:63,dur:25,n:2,kind:'fr',side:'F',form:'abreast',alt:'26'},
+  {path:'un',t0:4,dur:70,n:1,kind:'uk',dot:1,flash:1,side:'N',alt:'15'},
+  {path:'road',t0:0,dur:84,n:4,kind:'tank',side:'H',trail:.035,strike:[[1,28],[3,46]]}];
+ groups.forEach(g=>{g.v=PT[g.path].L/(g.period||g.dur);g.ph=g.ph||0;g.form=g.form||'abreast'});
+ const sams=[{x:1490,y:190,r:125},{x:140,y:880,r:95},{x:1520,y:610,r:70}];
+ function offs(g,i,t){if(g.form!=='cycle')return F[g.form][i]||[0,0];const q=(((t%CYC)+CYC)%CYC)/CYC*CYCLEF.length,k=Math.floor(q),e=ss(.82,1,q-k),A=F[CYCLEF[k]][i],B=F[CYCLEF[(k+1)%CYCLEF.length]][i];return[A[0]+(B[0]-A[0])*e,A[1]+(B[1]-A[1])*e]}
+ const units=[];groups.forEach(g=>{g.mem=[];for(let i=0;i<g.n;i++){const u={g,i,side:g.side,open:!g.period};g.mem.push(u);units.push(u)}});
+ const air=units.filter(u=>!u.g.trail),gnd=units.filter(u=>u.g.trail);
+ function gpos(un,t){const g=un.g;const u=(g.period?t/g.period+g.ph:(t-g.t0)/g.dur)-un.i*g.trail;if(!g.period&&(u<0||u>1))return null;return at(g.path,u)}
+ const on=p=>p&&p.x>10&&p.x<1590&&p.y>10&&p.y<990;
+ function simulate(events,gen){air.forEach(u=>{u.on=0;u.alive=1;u.shots=(!u.g.shooters||u.g.shooters.includes(u.i))?(u.g.shots||0):0;u.next=0;u.X=new Float32Array(N);u.Y=new Float32Array(N);u.H=new Float32Array(N);u.O=new Uint8Array(N);u.WX=new Float32Array(2*FPS);u.WY=new Float32Array(2*FPS);u.WH=new Float32Array(2*FPS)});
+  const samShots=sams.map(()=>1);const byS=new Map(),byT=new Map();events.forEach(e=>{if(e.strike)return;if(e.sh.u){if(!byS.has(e.sh.u))byS.set(e.sh.u,[]);byS.get(e.sh.u).push(e)}if(!byT.has(e.tg))byT.set(e.tg,[]);byT.get(e.tg).push(e)});
+  const init=(g,t)=>{const u0=g.period?t/g.period+g.ph:(t-g.t0)/g.dur,L=at(g.path,u0);g.mem.forEach(m=>{if(!m.alive)return;const o=offs(g,m.i,t),c=Math.cos(L.h),s=Math.sin(L.h);m.x=L.x+o[0]*c-o[1]*s;m.y=L.y+o[0]*s+o[1]*c;m.h=L.h;m.v=g.v;m.on=1})};
+  const T0=-CYC,steps=2*N;
+  for(let s=0;s<steps;s++){const t=T0+s*DT;
+   for(const g of groups){if(g.trail)continue;if(g.period){if(s===0)init(g,t)}else{if(t>=g.t0&&t<g.t0+DT*1.01&&t>=0)init(g,t);if(t>g.t0+g.dur||t<0)g.mem.forEach(m=>m.on=0)}}
+   for(const g of groups){if(g.trail)continue;const lead=g.mem.find(m=>m.alive&&m.on);if(!lead)continue;
+    for(const m of g.mem){if(!m.alive||!m.on)continue;let aim,vd,turn=1.45;
+     const atk=t>=0&&(byS.get(m)||[]).find(e=>t>=e.t0-3.5&&t<e.t0+1.5&&e.tg.alive&&e.tg.on);
+     const def=t>=0&&(byT.get(m)||[]).find(e=>t>=e.t0&&t<e.t1);
+     if(atk){aim={x:atk.tg.x,y:atk.tg.y};vd=g.v*1.3;turn=1.7}
+     else if(def){const sp2=def.sh.u?def.sh.u:def.sh.p,a=Math.atan2(m.y-sp2.y,m.x-sp2.x)+def.dir*1.25;aim={x:m.x+Math.cos(a)*220,y:m.y+Math.sin(a)*220};vd=g.v*1.4;turn=1.9}
+     else if(m===lead){const u=g.period?t/g.period+g.ph:(t-g.t0)/g.dur,P0=at(g.path,u),cr=carrot(g,u,1.3*g.v/PT[g.path].L),e=(P0.x-m.x)*Math.cos(m.h)+(P0.y-m.y)*Math.sin(m.h);aim=cr;vd=g.v*(1+Math.max(-.4,Math.min(.7,e/70)))}
+     else{const ol=offs(g,lead.i,t),om=offs(g,m.i,t),ox=om[0]-ol[0],oy=om[1]-ol[1],c=Math.cos(lead.h),sn=Math.sin(lead.h),Sx=lead.x+ox*c-oy*sn,Sy=lead.y+ox*sn+oy*c;aim={x:Sx+c*lead.v*.9,y:Sy+sn*lead.v*.9};const e=(Sx-m.x)*c+(Sy-m.y)*sn;vd=Math.max(.55*lead.v,Math.min(1.75*lead.v,lead.v+.9*e))}
+     const hd=Math.atan2(aim.y-m.y,aim.x-m.x),dh=wrap(hd-m.h),mt=turn*DT;m.h=wrap(m.h+Math.max(-mt,Math.min(mt,dh)));const dv=vd-m.v;m.v+=Math.max(-40*DT,Math.min(40*DT,dv));m.v=Math.max(m.v,.45*g.v);m.x+=Math.cos(m.h)*m.v*DT;m.y+=Math.sin(m.h)*m.v*DT}}
+   for(const u of air){if(u.alive&&u.killT!==undefined&&t>=u.killT)u.alive=0}
+   if(gen&&t>=0&&t<CYC-7&&s%6===0){const fly=events.filter(e=>!e.strike&&t>=e.t0-3&&t<e.t1).length;if(fly<2){
+     const shooters=[...air.filter(u=>u.alive&&u.on&&u.shots>0&&u.next<=t).map(u=>({u,p:{x:u.x,y:u.y},r:u.g.range,side:u.side})),...sams.map((q,k)=>samShots[k]>0?{s:k,p:{x:q.x,y:q.y},r:q.r,side:'H'}:null).filter(Boolean)];
+     for(const sh of shooters){if(!on(sh.p))continue;let best=null,bd=1e9;for(const tg of air){if(!tg.open||!tg.alive||!tg.on||tg.marked||tg.side===sh.side||tg.side==='N')continue;if(!on(tg))continue;const d=Math.hypot(tg.x-sh.p.x,tg.y-sh.p.y);if(d<sh.r&&d<bd){bd=d;best=tg}}
+      if(best){const tof=Math.max(2.6,bd/80),fx=best.x+Math.cos(best.h)*best.v*tof,fy=best.y+Math.sin(best.h)*best.v*tof;if(!(fx>70&&fx<1530&&fy>70&&fy<930))continue;best.marked=1;const e={sh,tg:best,t0:t+3.5,t1:t+3.5+tof,dir:events.length%2?1:-1,col:sh.side==='F'?C.W:C.R};if(sh.u){sh.u.shots--;sh.u.next=t+9}else samShots[sh.s]--;if(!sh.u){e.t0=t;e.t1=t+tof}best.killT=e.t1;events.push(e);break}}}}
+   const k=s-N;if(k>=0){for(const u of air){u.X[k]=u.x;u.Y[k]=u.y;u.H[k]=u.h;u.O[k]=u.alive&&u.on?1:0}}else if(k>=-2*FPS){const w=k+2*FPS;for(const u of air){u.WX[w]=u.x;u.WY[w]=u.y;u.WH[w]=u.h}}}
+  for(const u of air){if(!u.g.period)continue;for(let w=0;w<2*FPS;w++){const k=N-2*FPS+w,b=ss(0,2*FPS,w);if(!u.O[k])continue;u.X[k]+=(u.WX[w]-u.X[k])*b;u.Y[k]+=(u.WY[w]-u.Y[k])*b;u.H[k]=la(u.H[k],u.WH[w],b)}}}
+ const events=[];simulate(events,true);air.forEach(u=>u.marked=0);
+ groups.filter(g=>g.strike).forEach(g=>g.strike.forEach(([i,t])=>{const u=g.mem[i];u.dead=t;events.push({tg:u,t0:t-5,t1:t,strike:1})}));
+ simulate(events,false);
+ const st=(u,t)=>{if(u.g.trail){if(u.dead!==undefined&&t>=u.dead)return null;return gpos(u,t)}const f=((t%CYC)+CYC)%CYC*FPS,i0=Math.floor(f)%N,i1=(i0+1)%N,r=f-Math.floor(f);if(!u.O[i0])return null;if(!u.O[i1])return{x:u.X[i0],y:u.Y[i0],h:u.H[i0]};return{x:u.X[i0]+(u.X[i1]-u.X[i0])*r,y:u.Y[i0]+(u.Y[i1]-u.Y[i0])*r,h:la(u.H[i0],u.H[i1],r)}};
+ const NS='http://www.w3.org/2000/svg',mk=h=>{const e=document.createElementNS(NS,'g');e.innerHTML=h;dyn.appendChild(e);return e};
+ const sc=(c,d)=>' fill="none" stroke="'+c+'" stroke-width="2.2"'+(d?' stroke-dasharray="3 3"':'');
+ const shape=u=>{const k=u.g.kind,d=u.g.dot&&u.i===0;if(k==='flight')return['<circle r="11"'+sc(C.C)+'/><path d="M11 0H26"'+sc(C.C)+'/>','<text y="5" text-anchor="middle" fill="'+C.C+'" font-size="15">'+(u.i+1)+'</text>'+(u.i?'':'<text y="-17" text-anchor="middle" fill="'+C.C+'" font-size="15">'+u.g.alt+'</text>')];
+  const col=k==='ho'||k==='tank'?C.R:k==='uk'?C.Y:k==='ship'?(u.i===2?C.R:C.B):C.G;const alt=u.g.alt&&u.i===0?'<text y="-17" text-anchor="middle" fill="'+col+'" font-size="14">'+u.g.alt+'</text>':'';
+  if(k==='ho')return['<path d="M12 0L-8 -9L-8 9Z"'+sc(col,d)+'/><path d="M12 0H26"'+sc(col)+'/>',alt];
+  if(k==='uk')return['<rect x="-8" y="-8" width="16" height="16"'+sc(col,d)+'/><path d="M8 0H22"'+sc(col)+'/>',alt];
+  if(k==='tank')return['<rect x="-9" y="-5" width="18" height="10"'+sc(col)+'/><circle r="3.5"'+sc(col)+'/><path d="M3 0H15"'+sc(col)+'/>',''];
+  if(k==='ship')return['<path d="M-13 -5H13L8 5H-8Z"'+sc(col)+'/>',''];
+  const inner=k==='ppli'?'<text y="5" text-anchor="middle" fill="'+col+'" font-size="13">P</text>':k==='donor'?'<circle r="3" fill="'+col+'"/>':'';return['<circle r="9"'+sc(col,d)+'/><path d="M9 0H24"'+sc(col)+'/>',inner+alt]};
+ units.forEach(u=>{const[r,f]=shape(u);u.el=mk('<g>'+r+'</g>'+f);u.rot=u.el.firstChild});
+ events.forEach(e=>{e.el=mk(e.strike?'<path d="M0 -40L11 -20H-11Z" fill="none" stroke="'+C.W+'" stroke-width="2"/><line x1="0" y1="-20" x2="0" y2="-8" stroke="'+C.W+'" stroke-dasharray="2 3"/>':'<line stroke="'+e.col+'" stroke-opacity=".6" stroke-dasharray="5 5"/><line stroke="'+e.col+'" stroke-opacity=".9" stroke-width="1.5"/><circle r="4" fill="'+e.col+'"/>');e.bm=mk('<circle r="10" fill="none" stroke="#ffb347" stroke-width="3"/><circle r="5" fill="#fff3c4"/>')});
+ const set=(el,a)=>{for(const k in a)el.setAttribute(k,a[k])};
+ const kill=new Map();events.forEach(e=>kill.set(e.tg,e.t1));
+ function frame(t){units.forEach(u=>{const p=st(u,t);if(!p){u.el.style.display='none';return}u.el.style.display='';u.el.setAttribute('transform','translate('+p.x.toFixed(1)+' '+p.y.toFixed(1)+')');u.rot.setAttribute('transform','rotate('+(p.h*57.2958).toFixed(1)+')');const kt=kill.get(u);u.el.style.opacity=u.g.flash?(Math.floor(t*1.6)%2?.25:1):(kt!==undefined&&kt-t<1.2&&kt>t?(Math.floor(t*8)%2?.3:1):1)});
+  events.forEach(e=>{const live=t>=e.t0&&t<e.t1;e.el.style.display=live?'':'none';if(live){const q=st(e.tg,t);if(e.strike){if(q)e.el.setAttribute('transform','translate('+q.x.toFixed(1)+' '+q.y.toFixed(1)+')')}else if(q){if(!e.lp)e.lp=e.sh.u?(st(e.sh.u,e.t0)||e.sh.p):e.sh.p;const k=ss(0,1,(t-e.t0)/(e.t1-e.t0)),mx=e.lp.x+(q.x-e.lp.x)*k,my=e.lp.y+(q.y-e.lp.y)*k,spp=e.sh.u?st(e.sh.u,t):e.sh.p;const[lk,tr,ms]=e.el.children;if(spp)set(lk,{x1:spp.x,y1:spp.y,x2:q.x,y2:q.y,display:''});else set(lk,{display:'none'});set(tr,{x1:e.lp.x,y1:e.lp.y,x2:mx,y2:my});set(ms,{cx:mx,cy:my})}}
+   const bk=(t-e.t1)/1.4;if(bk>=0&&bk<1){if(!e.bp)e.bp=st(e.tg,e.t1-.05)||e.lp||{x:-99,y:-99};e.bm.style.display='';e.bm.setAttribute('transform','translate('+e.bp.x.toFixed(1)+' '+e.bp.y.toFixed(1)+')');const[r1,r2]=e.bm.children;r1.setAttribute('r',(6+34*bk).toFixed(1));e.bm.style.opacity=(1-bk).toFixed(2);r2.setAttribute('r',(6*(1-bk)).toFixed(1))}else e.bm.style.display='none'})}
+ const nm=u=>u.g.path+'#'+(u.i+1);
+ window.__sitEvents=events.map(e=>({t0:+e.t0.toFixed(1),t1:+e.t1.toFixed(1),shooter:e.strike?'strike':e.sh.u?nm(e.sh.u):'SAM',target:nm(e.tg),at:(p=>p?Math.round(p.x)+','+Math.round(p.y):'off')(st(e.tg,e.t1-.05))})).sort((a,b)=>a.t0-b.t0);
+ window.__sitState=(t)=>air.map(u=>{const p=st(u,t);return p?nm(u)+' '+Math.round(p.x)+','+Math.round(p.y)+' h'+Math.round(p.h*57.3):null}).filter(Boolean);
+ window.__sitCheck=()=>{let worst=0,who='';for(const u of air){for(let k=1;k<N;k++){if(!u.O[k]||!u.O[k-1])continue;const dx=u.X[k]-u.X[k-1],dy=u.Y[k]-u.Y[k-1],m=Math.atan2(dy,dx),dev=Math.abs(wrap(m-u.H[k]))*57.3;if(Math.hypot(dx,dy)>.3&&dev>worst){worst=dev;who=nm(u)+'@'+(k/FPS).toFixed(1)}}const k=N-1;if(u.O[k]&&u.O[0]){const j=Math.hypot(u.X[0]-u.X[k],u.Y[0]-u.Y[k]);if(j>6)who+=' seam '+nm(u)+' '+j.toFixed(1)}}return 'max slip '+worst.toFixed(1)+' deg '+who};
+ window.__sitFrame=frame;
+ const base0=performance.now()/1000-12;
+ if(matchMedia('(prefers-reduced-motion:reduce)').matches){frame(24);return}
+ const loop=()=>{frame((performance.now()/1000-base0)%CYC);sitRaf=requestAnimationFrame(loop)};loop()}
+const BG='<div class="bg" aria-hidden="true">'+SIT+'<div class="sweep"></div><div class="scan"></div><div class="vig"></div><div class="mfd"><b style="left:5%;top:6px">WPT</b><b style="left:56%;top:6px">DCL</b><b style="left:68%;top:6px">PP</b><b style="left:80%;top:6px">T-UP</b><i style="left:16px;top:44px">AZ 001L\nR 40.0\n063-040</i><b style="left:6px;top:26%">R0</b><b class="v" style="left:6px;top:34%">MASK</b><b class="v" style="left:6px;top:52%">BAND</b><b style="left:6px;top:74%">GS</b><i style="left:16px;top:80%">114-079\nN25 20.5\nE055 51.7</i><b style="right:6px;top:20%">ZM</b><b class="v" style="right:6px;top:34%">&#9650;40&#9660;</b><b class="v" style="right:6px;top:58%">004</b><b style="right:6px;top:78%">M</b><i style="right:16px;bottom:44px">144-061</i><b style="left:5%;bottom:6px">BOT</b><b style="left:16%;bottom:6px">FLR</b><b style="right:16%;bottom:6px">A</b></div></div>';
+/* ---- test checklist: items/{id} (owner + Editors set the verdict), reports/{uid} (each tester's own flags) ---- */
+const CKEY='mf15e-checks-v1',MK={open:'&#9675;',ok:'&#10003;',bad:'&#10007;'},VL={open:'Not tested',ok:'Working',bad:'Broken'};
+const RPI={look:'&#9673;',ok:'&#10003;',bad:'&#10007;',err:'&#9888;'},RPL={look:'On it',ok:'Works',bad:'Broken',err:'Error'},RPT={look:'is on it',ok:'works for them',bad:'broken for them',err:'got an error'};
+const CK={items:{},reports:{},names:{},me:null,admin:false,tester:false,mode:LOCAL?'local':'wait',err:''};
+let db=null,usr=null,flt='all',rq=0;const asked=new Set(),WQ={};
+if(LOCAL){CK.me='local';CK.names.local='You';CK.admin=CK.tester=true;
+ try{const o=JSON.parse(localStorage.getItem(CKEY)||'null');if(o&&o.items){CK.items=o.items;CK.reports=o.reports||{}}else throw 0}
+ catch(e){T().forEach(t=>(t.checks||t.details||[]).forEach((d,i)=>{CK.items[t.id+'-'+(i+1)]={tile:t.id,text:d,order:i+1,status:'open',note:'',ver:'',by:'',at:''}}))}}
+const nowI=()=>new Date().toISOString(),uidN=()=>'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const fmtD=s=>{const d=new Date(s);return isNaN(d)?'':d.toLocaleDateString(undefined,{day:'numeric',month:'short'})};
+const nm=id=>id===CK.me?'You':(CK.names[id]||'Someone');
+function itemsOf(tid){return Object.entries(CK.items).filter(([k,v])=>v&&v.tile===tid).map(([id,v])=>Object.assign({id},v)).sort((a,b)=>(a.order||0)-(b.order||0)||a.id.localeCompare(b.id))}
+function repsOf(id){return Object.entries(CK.reports).map(([u,r])=>[u,r&&r.r&&r.r[id]]).filter(x=>x[1]&&RPL[x[1].s])}
+function newsOf(tid){const out=[];Object.entries(CK.reports).forEach(([u,r])=>Object.entries((r&&r.add)||{}).forEach(([a,v])=>{if(v&&v.tile===tid&&!v.done)out.push([u,a,v])}));return out.sort((a,b)=>String(a[2].at).localeCompare(String(b[2].at)))}
+function cnt(L){const c={n:L.length,ok:0,bad:0,open:0};L.forEach(i=>{c[i.status==='ok'||i.status==='bad'?i.status:'open']++});return c}
+function say(t){msg=t;const m=document.querySelector('.msg[role=status]');if(m)m.textContent=t}
+function fail(e){const c=e&&e.code;say(c==='invalid_argument'?'That change was refused: your access level does not allow it. Ask the owner.':c==='quota_exceeded'?'The tracker is full. Delete old checks or reports, then try again.':'Could not save ('+(c||e)+'). Try again.')}
+function wq(path,fn){const p=(WQ[path]||Promise.resolve()).then(fn);WQ[path]=p.catch(()=>{});return p}
+function saveLocal(){try{localStorage.setItem(CKEY,JSON.stringify({items:CK.items,reports:CK.reports}))}catch(e){}}
+function setItem(id,n){CK.items[id]=n;refresh();if(LOCAL){saveLocal();return}wq('items/'+id,()=>db.doc('items/'+id).set(n)).catch(fail)}
+function delItem(id){delete CK.items[id];refresh();if(LOCAL){saveLocal();return}wq('items/'+id,()=>db.doc('items/'+id).delete()).catch(fail)}
+function verdict(id,status,note,ver){const c=CK.items[id];if(!c)return;const fixed=status==='ok'?(c.status==='bad'||!!c.retest||(c.status==='ok'&&!!c.fixed)):false,retest=status==='open'?(c.status==='bad'||!!c.retest):false;setItem(id,Object.assign({},c,{fixed,retest,status,note:note||'',ver:status==='open'?'':(ver||S.meta.current),by:status==='open'?'':CK.me,at:status==='open'?'':nowI()}))}
+function myRep(mut){const me=CK.me;if(!me)return;const cur=JSON.parse(JSON.stringify(CK.reports[me]||{}));cur.r=cur.r||{};cur.add=cur.add||{};mut(cur);CK.reports[me]=cur;refresh();if(LOCAL){saveLocal();return}wq('reports/'+me,()=>db.doc('reports/'+me).set(cur)).catch(fail)}
+function closeNew(uid,aid){if(uid===CK.me){myRep(c=>{delete c.add[aid]});return}const r=CK.reports[uid];if(!r||!r.add||!r.add[aid])return;const cur=JSON.parse(JSON.stringify(r));cur.add[aid].done=true;CK.reports[uid]=cur;refresh();if(LOCAL){saveLocal();return}wq('reports/'+uid,()=>db.doc('reports/'+uid).update({add:{[aid]:{done:true}}})).catch(fail)}
+function refresh(){if(rq)return;rq=requestAnimationFrame(()=>{rq=0;const p=document.getElementById('pan');if(!p)return;
+ const keep=[...p.querySelectorAll('input[id],textarea[id]')].map(x=>[x.id,x.value]),ae=document.activeElement,fid=ae&&p.contains(ae)&&ae.id;
+ p.innerHTML=panel();keep.forEach(([i,v])=>{const x=document.getElementById(i);if(x)x.value=v});if(fid){const x=document.getElementById(fid);if(x)x.focus()}
+ layout();const h=document.getElementById('hud');if(h)h.innerHTML=hud();const s=document.getElementById('iss');if(s)s.innerHTML=issues();const e=document.getElementById('ed');if(e)e.hidden=!(LOCAL||CK.admin);const w=document.getElementById('who');if(w)w.innerHTML=who()})}
+/* ---- Firebase backend (free Spark plan): Google sign-in + Firestore. Roles live in config/team {owner, admins[], testers[]} ---- */
+let FB=null,TEAM=null,ME=null,UNS=[],RQ={};const PHOTOS={};let lastRoad='';
+function fbReady(){return new Promise(r=>{if(window.FBX!==undefined)return r(window.FBX);addEventListener('fbready',()=>r(window.FBX),{once:true});setTimeout(()=>r(window.FBX||null),15000)})}
+const fbErr=x=>({code:x&&x.code==='permission-denied'?'invalid_argument':(x&&x.code)||String(x)});
+const dbA={collection:c=>({onSnapshot:(n,e)=>FB.F.onSnapshot(FB.F.collection(FB.fs,c),s=>n({docs:s.docs.map(d=>({id:d.id,exists:true,data:()=>d.data()})),metadata:{fromCache:s.metadata.fromCache}}),x=>e&&e(fbErr(x)))}),
+ doc:p=>{const r=()=>FB.F.doc(FB.fs,p);return{set:o=>FB.F.setDoc(r(),o).catch(x=>{throw fbErr(x)}),update:o=>FB.F.setDoc(r(),o,{merge:true}).catch(x=>{throw fbErr(x)}),delete:()=>FB.F.deleteDoc(r()).catch(x=>{throw fbErr(x)})}}};
+const myEmail=()=>((ME&&ME.email)||'').toLowerCase();
+function unsubAll(){UNS.forEach(u=>{try{u()}catch(e){}});UNS=[]}
+function applyTeam(t){TEAM=t;const em=myEmail();CK.admin=!!(t&&(t.admins||[]).includes(em));CK.tester=!!(t&&(CK.admin||(t.testers||[]).includes(em)));CK.owner=!!(t&&t.owner===em)}
+async function ckInit(){FB=await fbReady();if(!FB){CK.mode='off';CK.err='setup';refresh();return}db=dbA;
+ FB.U.onAuthStateChanged(FB.auth,async u=>{unsubAll();ME=u;CK.items={};CK.reports={};TEAM=null;CK.admin=CK.tester=CK.owner=false;CK.reqSent=false;RQ={};
+  if(!u){CK.me=null;CK.mode='signin';refresh();return}
+  CK.me=u.uid;CK.names[u.uid]=u.displayName||'';CK.mode='wait';refresh();const em=myEmail();
+  let t=null;try{const s=await FB.F.getDoc(FB.F.doc(FB.fs,'config/team'));t=s.exists()?s.data():null}catch(x){t=null}
+  if(!t&&new URLSearchParams(location.search).get('claim')==='1'){const n={owner:em,admins:[em],testers:[]};try{await FB.F.setDoc(FB.F.doc(FB.fs,'config/team'),n);t=n;say('You are now the owner of this tracker.')}catch(x){}}
+  if(!t){CK.mode='noaccess';try{const r=await FB.F.getDoc(FB.F.doc(FB.fs,'requests/'+u.uid));CK.reqSent=r.exists()}catch(x){}refresh();return}
+  applyTeam(t);CK.mode='wait';refresh();
+  const sub=(c,f)=>UNS.push(FB.F.onSnapshot(FB.F.collection(FB.fs,c),f,x=>{if(c==='items'){CK.mode='off';CK.err=x.code;refresh()}}));
+  UNS.push(FB.F.onSnapshot(FB.F.doc(FB.fs,'config/team'),s=>{if(!s.exists())return;applyTeam(s.data());if(!CK.tester){unsubAll();CK.mode='noaccess';CK.items={};CK.reports={}}refresh()},()=>{unsubAll();CK.mode='noaccess';refresh()}));
+  sub('items',s=>{const m={};s.docs.forEach(d=>{m[d.id]=d.data()});CK.items=m;CK.mode='live';refresh()});
+  sub('reports',s=>{const m={};s.docs.forEach(d=>{m[d.id]=d.data()});CK.reports=m;refresh()});
+  sub('people',s=>{s.docs.forEach(d=>{CK.names[d.id]=(d.data().name||'')});refresh()});
+  sub('photos',s=>{s.docs.forEach(d=>{PHOTOS[d.id]=d.data().url||''});refresh()});
+  UNS.push(FB.F.onSnapshot(FB.F.doc(FB.fs,'config/roadmap'),s=>{if(!s.exists())return;const j=s.data().json;if(!j||j===lastRoad)return;try{const o=JSON.parse(j);if(o&&Array.isArray(o.tiles)&&o.meta){lastRoad=j;o.credits=Object.assign({},S.credits,o.credits);S=o;if(!T().some(x=>x.id===sel)){const c=T().find(x=>x.kind==='current');sel=c?c.id:(T()[0]||{}).id}render()}}catch(e){}},()=>{}));
+  if(CK.admin)UNS.push(FB.F.onSnapshot(FB.F.collection(FB.fs,'requests'),s=>{RQ={};s.docs.forEach(d=>{RQ[d.id]=d.data()});refresh()},()=>{}));
+  const nmv=u.displayName||em.split('@')[0];if(CK.tester)FB.F.setDoc(FB.F.doc(FB.fs,'people/'+u.uid),{name:nmv},{merge:true}).catch(()=>{});
+ })}
+async function names(){}
+function signIn(){if(!FB)return;const p=new FB.U.GoogleAuthProvider();p.setCustomParameters({prompt:'select_account'});FB.U.signInWithPopup(FB.auth,p).catch(e=>{if(e&&/popup-blocked|operation-not-supported/.test(e.code||''))FB.U.signInWithRedirect(FB.auth,p);else if(!/popup-closed|cancelled-popup/.test((e&&e.code)||''))say('Sign-in failed ('+((e&&e.code)||e)+').')})}
+function who(){if(LOCAL)return '';if(!FB)return CK.mode==='wait'?'':'';if(!ME)return '<button class="btn" id="signin">Sign in with Google</button>';
+ return '<span class="chip who"><b>'+esc(ME.displayName||myEmail())+'</b>'+(CK.owner?'Owner':CK.admin?'Lead':CK.tester?'Tester':'No access')+'</span>'+(CK.admin?'<button class="btn" id="team">Team'+(Object.keys(RQ).length?' ('+Object.keys(RQ).length+')':'')+'</button>':'')+'<button class="btn sm" id="signout">Sign out</button>'}
+function seedChecks(){if(!CK.admin||!FB)return;const b=FB.F.writeBatch(FB.fs);let n=0;T().forEach(t=>(t.checks||[]).forEach((x,i)=>{b.set(FB.F.doc(FB.fs,'items/'+t.id+'-'+(i+1)),{tile:t.id,text:x,order:i+1,status:'open',note:'',ver:'',by:'',at:''});n++}));b.commit().then(()=>say('Loaded '+n+' starting checks.')).catch(fail)}
+function saveRoad(){if(!FB||!CK.admin)return;const j=JSON.stringify(S);lastRoad=j;msg='Saving for the team…';FB.F.setDoc(FB.F.doc(FB.fs,'config/roadmap'),{json:j,at:nowI(),by:CK.me}).then(()=>say('Saved for the team.')).catch(e=>fail(fbErr(e)))}
+function teamForm(){if(!CK.admin||!TEAM)return;const f=document.getElementById('frm'),t=TEAM,rq=Object.entries(RQ);
+ const li=(e,kind)=>'<li><span>'+esc(e)+(e===t.owner?' <em>owner</em>':'')+'</span>'+((kind==='testers'||(CK.owner&&e!==t.owner))?'<button type="button" class="btn sm warn" data-tm-del="'+kind+'|'+esc(e)+'">Remove</button>':'')+'</li>';
+ f.innerHTML='<form class="f" id="tmf"><h3>Team</h3><p class="full" style="margin:0;color:var(--mut)">People sign in with these Google accounts. Leads set &#10003; and &#10007; and edit everything; testers can only flag checks.'+(CK.owner?'':' Only the owner can change who is a lead.')+'</p>'
+ +(rq.length?'<div class="full"><h4 class="tmh">Asking to join</h4><ul class="tm">'+rq.map(([u,r])=>'<li><span>'+esc(r.name||'')+' &lt;'+esc(r.email||'')+'&gt;</span><span><button type="button" class="btn sm" data-rq-ok="'+esc(u)+'">Add as tester</button> <button type="button" class="btn sm warn" data-rq-no="'+esc(u)+'">Dismiss</button></span></li>').join('')+'</ul></div>':'')
+ +'<div class="full"><h4 class="tmh">Leads</h4><ul class="tm">'+(t.admins||[]).map(e=>li(e,'admins')).join('')+'</ul></div>'
+ +'<div class="full"><h4 class="tmh">Testers</h4><ul class="tm">'+((t.testers||[]).length?(t.testers||[]).map(e=>li(e,'testers')).join(''):'<li><span class="msg">No testers yet.</span></li>')+'</ul></div>'
+ +'<label>Google email<input id="tm-e" type="email" autocomplete="off" placeholder="name@gmail.com"></label><label>Role<select id="tm-r"><option value="testers">Tester</option>'+(CK.owner?'<option value="admins">Lead</option>':'')+'</select></label><p class="full msg" id="tm-m"></p><div class="row full"><button type="button" class="btn" data-close>Close</button><button class="btn on">Add</button></div></form>';
+ if(!f.open)f.showModal();
+ f.querySelector('#tmf').onsubmit=e=>{e.preventDefault();const em=f.querySelector('#tm-e').value.trim().toLowerCase(),k=f.querySelector('#tm-r').value;if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){f.querySelector('#tm-m').textContent='Enter a full email address.';return}teamSave(n=>{if(!n[k].includes(em))n[k].push(em);if(k==='admins')n.testers=n.testers.filter(x=>x!==em)})}}
+function teamSave(mut){const n=JSON.parse(JSON.stringify(TEAM));n.admins=n.admins||[];n.testers=n.testers||[];mut(n);FB.F.setDoc(FB.F.doc(FB.fs,'config/team'),n).then(()=>{applyTeam(n);teamForm()}).catch(e=>{const m=document.getElementById('tm-m');if(m)m.textContent='Could not save ('+((e&&e.code)||e)+').'})}
+function photoUpload(file){return new Promise((res,rej)=>{const im=new Image(),u=URL.createObjectURL(file);im.onload=()=>{const k=Math.min(1,1400/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);let q=.82,d=c.toDataURL('image/jpeg',q);while(d.length>900000&&q>.4){q-=.12;d=c.toDataURL('image/jpeg',q)}const id='p'+Date.now().toString(36);FB.F.setDoc(FB.F.doc(FB.fs,'photos/'+id),{url:d,at:nowI(),by:CK.me}).then(()=>{PHOTOS[id]=d;res('photo:'+id)}).catch(rej)};im.onerror=rej;im.src=u})}
+function hud(){if(CK.mode==='wait'||CK.mode==='off')return '<span class="chip"><b style="color:var(--gold)">'+esc(S.meta.current)+'</b>current</span>';const c=cnt(Object.values(CK.items).filter(i=>i&&T().some(t=>t.id===i.tile)));
+ return '<span class="chip"><b style="color:var(--grn)">'+c.ok+'</b>working</span><span class="chip"><b style="color:#ff6b5e">'+c.bad+'</b>broken</span><span class="chip"><b style="color:#c9d3d8">'+c.open+'</b>not tested</span><span class="chip"><b style="color:var(--cyn)">'+Object.values(CK.items).filter(i=>i&&i.fixed&&i.status==='ok').length+'</b>fixed</span><span class="chip"><b style="color:var(--gold)">'+esc(S.meta.current)+'</b>current</span>'}
+function role(){if(LOCAL)return 'Local copy: checks save in this browser only.';if(CK.admin)return 'You can set the official &#10003; and &#10007; (owner or lead), add, edit and delete checks, and flag your own tests.';if(CK.tester)return 'Flag what you have looked at: On it, Works, Broken or Error, with a note. Only the owner or the dev lead sets the official &#10003; or &#10007; and edits the list.';return 'View only.'}
+function ckRow(i){const s=VL[i.status]?i.status:'open',reps=repsOf(i.id),mine=CK.me&&CK.reports[CK.me]&&CK.reports[CK.me].r&&CK.reports[CK.me].r[i.id],id=esc(i.id);
+ return '<li class="'+s+'"><span class="mk" role="img" aria-label="'+VL[s]+'">'+MK[s]+'</span><div class="ckt"><b>'+esc(i.text)+'</b>'
+ +(s==='open'?'<small>'+(i.retest?'<span class="rtt">Needs retest</span> Was broken':'Not tested yet')+(i.note?' · '+esc(i.note):'')+'</small>':'<small'+(s==='bad'?' class="nt"':'')+'>'+(s==='ok'&&i.fixed?'<span class="fxd">Fixed</span> ':'')+(i.note?esc(i.note)+' · ':'')+VL[s]+(i.ver?' on '+esc(i.ver):'')+' · '+esc(nm(i.by))+(i.at?', '+esc(fmtD(i.at)):'')+'</small>')
+ +(reps.length?'<div class="rps">'+reps.map(([u,r])=>'<span class="rp '+esc(r.s)+'">'+RPI[r.s]+' '+esc(nm(u))+' '+RPT[r.s]+(r.note?': '+esc(r.note):'')+(r.ver?' ('+esc(r.ver)+')':'')+'</span>').join('')+'</div>':'')+'</div><div class="cka">'
+ +(CK.tester?'<span class="grp">'+['look','ok','bad','err'].map(x=>'<button type="button" class="pill '+x+(mine&&mine.s===x?' on':'')+'" data-r="'+x+'" data-id="'+id+'" aria-pressed="'+!!(mine&&mine.s===x)+'">'+RPI[x]+' '+RPL[x]+'</button>').join('')+'</span>':'')
+ +(CK.admin?'<span class="grp"><button type="button" class="ib g'+(s==='ok'?' on':'')+'" data-v="ok" data-id="'+id+'" title="Mark working" aria-label="Mark working" aria-pressed="'+(s==='ok')+'">&#10003;</button><button type="button" class="ib r'+(s==='bad'?' on':'')+'" data-v="bad" data-id="'+id+'" title="Mark broken" aria-label="Mark broken" aria-pressed="'+(s==='bad')+'">&#10007;</button><button type="button" class="ib" data-eck="'+id+'" title="Edit or delete" aria-label="Edit check">&#9998;</button>'+(edit?'<button type="button" class="ib" data-mvck="-1" data-id="'+id+'" aria-label="Move up">&#8593;</button><button type="button" class="ib" data-mvck="1" data-id="'+id+'" aria-label="Move down">&#8595;</button>':'')+'</span>':'')+'</div></li>'}
+function newRow([u,a,v]){const k=esc(u)+'|'+esc(a);return '<li class="new"><span class="mk" role="img" aria-label="Tester report">!</span><div class="ckt"><b>'+esc(v.text)+'</b><small>Reported by '+esc(nm(u))+(v.ver?' on '+esc(v.ver):'')+(v.at?', '+esc(fmtD(v.at)):'')+'</small></div><div class="cka"><span class="grp">'+(CK.admin?'<button type="button" class="pill bad" data-promote="'+k+'">&#10007; Add as broken</button><button type="button" class="pill" data-promote="'+k+'" data-st="open">Add as check</button>':'')+(CK.admin||u===CK.me?'<button type="button" class="pill" data-dismiss="'+k+'">'+(u===CK.me?'Withdraw':'Dismiss')+'</button>':'')+'</span></div></li>'}
+function checks(t){const head=x=>'<div class="ckh"><h3>Test checklist</h3>'+(x||'')+'</div>';
+ if(CK.mode==='signin')return head()+'<p class="msg">Dev team only. Sign in with your Google account to see the checklist and flag your tests.</p><button type="button" class="btn on" data-signin="1">Sign in with Google</button>';if(CK.mode==='noaccess')return head()+'<p class="msg">You are signed in as '+esc(myEmail())+', which is not on the team list yet.</p>'+(CK.reqSent?'<p class="msg">Request sent. The owner or the dev lead will add you.</p>':'<button type="button" class="btn on" data-req="1">Ask to join the team</button>');if(CK.mode==='wait')return head()+'<p class="msg">Loading the team&#39;s checks&#8230;</p>';
+ if(CK.mode==='off')return head()+'<p class="msg">'+(CK.err==='setup'?'The team database is not connected yet.':'The team&#39;s checks can&#39;t be reached right now'+(CK.err?' ('+esc(CK.err)+')':'')+'. Check your connection and reload.')+' What this sector covers:</p><ul class="plain">'+(t.checks||t.details||[]).map(d=>'<li>'+esc(d)+'</li>').join('')+'</ul>';
+ if(CK.mode==='live'&&CK.admin&&!Object.keys(CK.items).length)return head()+'<p class="msg">The team database is empty. Load the starting checklist (every sector&#39;s checks, all Not tested).</p><button type="button" class="btn on" data-seed="1">Load starting checklist</button>';
+ const L=itemsOf(t.id),c=cnt(L),N=newsOf(t.id),look=L.filter(i=>repsOf(i.id).some(r=>r[1].s==='look')).length;
+ const vis=L.filter(i=>flt==='all'||(flt==='look'?repsOf(i.id).length>0:(VL[i.status]?i.status:'open')===flt));
+ const pc=x=>c.n?(x/c.n*100).toFixed(1)+'%':'0';
+ const F=[['all','All',c.n],['bad','Broken',c.bad],['open','Not tested',c.open],['ok','Working',c.ok],['look','Flagged',L.filter(i=>repsOf(i.id).length).length]];
+ return head('<span class="bar" aria-hidden="true"><i style="width:'+pc(c.ok)+';background:var(--grn)"></i><i style="width:'+pc(c.bad)+';background:#e5392a"></i></span><span class="tot">'+c.ok+' of '+c.n+' working</span>')
+ +'<div class="flt" role="group" aria-label="Show">'+F.map(([k,l,n])=>'<button type="button" data-f="'+k+'" aria-pressed="'+(flt===k)+'">'+l+' '+n+'</button>').join('')+'</div><p class="role">'+role()+'</p>'
+ +'<ul class="ck">'+(flt==='all'||flt==='bad'?N.map(newRow).join(''):'')+vis.map(ckRow).join('')+'</ul>'
+ +(!vis.length&&!(N.length&&(flt==='all'||flt==='bad'))?'<p class="msg">'+(c.n?'Nothing here under this filter.':'No checks in this sector yet.'+(CK.admin?' Add the first one below.':''))+'</p>':'')
+ +(CK.admin?'<form class="cki" data-form="add"><input id="ck-add" placeholder="Add a check to this sector" aria-label="New check" autocomplete="off"><button class="btn sm">Add check</button></form>':'')
+ +(CK.tester&&!CK.admin?'<form class="cki" data-form="rep"><input id="ck-rep" placeholder="Report a problem in this sector" aria-label="Report a problem" autocomplete="off"><button class="btn sm">Report</button></form>':'')}
+function issues(){if(CK.mode!=='live'&&CK.mode!=='local')return '';const bad=[],fl=[],lk=[],un=[],fx=[];
+ T().forEach(t=>{const L=itemsOf(t.id);L.forEach(i=>{const rs=repsOf(i.id);if(i.status==='bad')bad.push([t,i.text,i.note]);else rs.filter(r=>r[1].s==='bad'||r[1].s==='err').forEach(([u,r])=>fl.push([t,i.text,nm(u)+(r.s==='err'?' (error)':'')+': '+(r.note||RPT[r.s])]));if(i.fixed&&i.status==='ok')fx.push([t,i,'Fixed'+(i.ver?' in '+i.ver:'')+(i.by?' · '+nm(i.by):'')]);rs.filter(r=>r[1].s==='look').forEach(([u])=>lk.push([t,i.text,nm(u)]))});newsOf(t.id).forEach(([u,a,v])=>fl.push([t,v.text,'new report by '+nm(u)]));L.filter(i=>i.status==='open'&&i.retest).forEach(i=>un.push([t,'Needs retest: '+i.text,i.note||'']));const o=cnt(L).open;if(o)un.push([t,o+' of '+L.length+' not tested','']);});
+ const col=(h,cls,A,empty)=>'<div><h4 class="'+cls+'">'+h+' <span>'+A.length+'</span></h4>'+(A.length?'<ul>'+A.map(([t,x,n])=>'<li><button type="button" data-go="'+esc(t.id)+'"><em>'+esc(t.title)+'</em> '+esc(x)+(n?' <small>'+esc(n)+'</small>':'')+'</button></li>').join('')+'</ul>':'<p class="msg">'+empty+'</p>')+'</div>';
+ return '<h3>Needs attention</h3><div class="cols">'+col('Broken','x',bad,'Nothing marked broken.')+col('Tester flags to review','f',fl,'No open tester flags.')+col('Being looked at','l',lk,'Nobody has claimed a check.')+col('Recently fixed','g',fx.sort((a,b)=>String(b[1].at).localeCompare(String(a[1].at))).slice(0,10).map(([t,i,n])=>[t,i.text,n]),'Nothing fixed yet.')+col('Not tested yet','u',un,'Every check has a verdict.')+'</div>'}
+function ckForm(mode,id){const f=document.getElementById('frm'),i=CK.items[id];if(!i)return;const mine=(CK.reports[CK.me]&&CK.reports[CK.me].r&&CK.reports[CK.me].r[id])||{};const st=mode.st;
+ const sel=(o,v)=>Object.entries(o).map(([k,l])=>'<option value="'+k+'"'+(k===v?' selected':'')+'>'+l+'</option>').join('');
+ f.innerHTML='<form class="f" id="cf"><h3>'+(mode.v?'Check status':'Your test')+'</h3><p class="full" style="margin:0;color:var(--mut)">'+esc(i.text)+'</p>'
+ +(mode.v?'<label class="full">Check<input id="c-t" required value="'+esc(i.text)+'"></label><label>Status<select id="c-s">'+sel(VL,st||i.status||'open')+'</select></label>':'<label>Your result<select id="c-s">'+sel({look:'On it (looking at it)',ok:'Works for me',bad:'Broken for me',err:'Error (script error, crash or log error)'},st||mine.s||'look')+'</select></label>')
+ +'<label>Build tested<input id="c-v" value="'+esc((mode.v?i.ver:mine.ver)||S.meta.current)+'"></label><label class="full">'+(st==='bad'||st==='err'?'What happened? (steps, error text, dcs.log line)':'Note')+'<textarea id="c-n" style="min-height:90px">'+esc(mode.v?(st==='bad'&&i.status!=='bad'?'':i.note):(st&&st!==mine.s?'':mine.note)||'')+'</textarea></label>'
+ +'<div class="row full">'+(mode.v?'<button type="button" class="btn warn" id="c-del">Delete check</button>':(mine.s?'<button type="button" class="btn warn" id="c-del">Remove my flag</button>':''))+'<button type="button" class="btn" data-close>Cancel</button><button class="btn on">Save</button></div></form>';
+ f.showModal();const q=x=>f.querySelector(x),v=x=>q(x).value.trim();setTimeout(()=>q('#c-n').focus(),0);
+ const del=q('#c-del');if(del)del.onclick=()=>{if(mode.v&&del.dataset.sure!=='1'){del.dataset.sure='1';del.textContent='Click again to delete';return}f.close();if(mode.v){say('Deleted check: '+i.text);delItem(id)}else myRep(c=>{delete c.r[id]})};
+ q('#cf').onsubmit=e=>{e.preventDefault();f.close();if(mode.v){const n=Object.assign({},i,{text:v('#c-t')||i.text});const s=v('#c-s');CK.items[id]=n;verdict(id,s,v('#c-n'),v('#c-v'))}else{const s=v('#c-s'),note=v('#c-n'),ver=v('#c-v');myRep(c=>{c.r[id]={s,note,ver,at:nowI()}})}}}
+function ckClick(b,d){
+ if(b.id==='signin'||d.signin){signIn();return true}
+ if(b.id==='signout'){if(FB)FB.U.signOut(FB.auth);return true}
+ if(b.id==='team'){teamForm();return true}
+ if(d.req){if(FB&&ME)FB.F.setDoc(FB.F.doc(FB.fs,'requests/'+ME.uid),{email:myEmail(),name:ME.displayName||'',at:nowI()}).then(()=>{CK.reqSent=true;refresh()}).catch(e=>say('Could not send the request ('+((e&&e.code)||e)+').'));return true}
+ if(d.seed){b.disabled=true;seedChecks();return true}
+ if(d.tmDel){const [k,em]=d.tmDel.split('|');teamSave(n=>{n[k]=n[k].filter(x=>x!==em)});return true}
+ if(d.rqOk){const r=RQ[d.rqOk];if(!r)return true;const em=String(r.email||'').toLowerCase();teamSave(n=>{if(em&&!n.testers.includes(em)&&!n.admins.includes(em))n.testers.push(em)});FB.F.deleteDoc(FB.F.doc(FB.fs,'requests/'+d.rqOk)).catch(()=>{});return true}
+ if(d.rqNo){FB.F.deleteDoc(FB.F.doc(FB.fs,'requests/'+d.rqNo)).catch(()=>{});delete RQ[d.rqNo];teamForm();return true}
+
+ if(d.f){flt=d.f;refresh();return true}
+ if(d.go){select(d.go);document.getElementById('pan').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});return true}
+ if(d.v&&d.id){const i=CK.items[d.id];if(!i)return true;if(i.status===d.v)verdict(d.id,'open');else if(d.v==='bad')ckForm({v:1,st:'bad'},d.id);else verdict(d.id,'ok','',S.meta.current);return true}
+ if(d.eck){ckForm({v:1},d.eck);return true}
+ if(d.r&&d.id){const m=CK.reports[CK.me]&&CK.reports[CK.me].r&&CK.reports[CK.me].r[d.id];if(m&&m.s===d.r)myRep(c=>{delete c.r[d.id]});else if(d.r==='bad'||d.r==='err')ckForm({st:d.r},d.id);else myRep(c=>{c.r[d.id]={s:d.r,note:'',ver:S.meta.current,at:nowI()}});return true}
+ if(d.mvck&&d.id){const i=CK.items[d.id];if(!i)return true;const L=itemsOf(i.tile),k=L.findIndex(x=>x.id===d.id),j=k+ +d.mvck;if(j<0||j>=L.length)return true;L.forEach((x,n)=>{x.o2=n+1});[L[k].o2,L[j].o2]=[L[j].o2,L[k].o2];L.forEach(x=>{if((CK.items[x.id].order||0)!==x.o2){const n=Object.assign({},CK.items[x.id],{order:x.o2});setItem(x.id,n)}});return true}
+ if(d.promote){const [u,a]=d.promote.split('|'),r=CK.reports[u],v=r&&r.add&&r.add[a];if(!v)return true;const L=itemsOf(v.tile),st=d.st||'bad';const id=uidN();CK.items[id]={tile:v.tile,text:v.text,order:(L.length?Math.max(...L.map(x=>x.order||0)):0)+1,status:'open',note:'',ver:'',by:'',at:''};verdict(id,st,st==='bad'?'Reported by '+nm(u):'',v.ver);closeNew(u,a);return true}
+ if(d.dismiss){const [u,a]=d.dismiss.split('|');closeNew(u,a);return true}
+ return false}
+function ckSubmit(form){const k=form.dataset.form,inp=form.querySelector('input'),text=inp.value.trim();if(!text)return;const t=T().find(x=>x.id===sel);if(!t)return;inp.value='';
+ if(k==='add'){const L=itemsOf(t.id);const id=uidN();setItem(id,{tile:t.id,text,order:(L.length?Math.max(...L.map(x=>x.order||0)):0)+1,status:'open',note:'',ver:'',by:'',at:'',createdBy:CK.me||''})}
+ if(k==='rep'){myRep(c=>{c.add[uidN()]={tile:t.id,text,ver:S.meta.current,at:nowI()}});say('Reported. The owner or lead will review it.')}}
+function tile(t,k,w,h,x,y){const c=t.kind,hc=(CK.mode==="live"||CK.mode==="local")?cnt(itemsOf(t.id)):{n:0};return '<button type="button" class="hx s-'+esc(c)+(hc.bad?' h-bad':hc.n&&hc.ok===hc.n?' h-ok':'')+(t.id===sel?' sel':'')+'" data-i="'+esc(t.id)+'" style="left:'+x+'px;top:'+y+'px;width:'+w+'px;height:'+h+'px" aria-label="'+esc(t.title+', '+(KIND[c]||c)+', '+t.ver+(hc.n?', '+hc.ok+' working, '+hc.bad+' broken, '+hc.open+' not tested':''))+'" aria-pressed="'+(t.id===sel)+'"><span class="gl"></span><span class="fr"></span><span class="fc">'+(t.img?'<img src="'+esc(src(t.img))+'" alt="" draggable="false">':'')+'<span class="sh"></span><span class="cd">'+(hc.n?'<span class="hc"><i class="o">&#10003;'+hc.ok+'</i><i class="x">&#10007;'+hc.bad+'</i><i class="u">&#9675;'+hc.open+'</i></span>':(c==='planned'?'&#128274; ':'')+'STPT '+(k+1))+'</span>'+(t.tag?'<span class="tg">'+esc(t.tag)+'</span>':'')+'<span class="tt">'+esc(t.title)+'</span><span class="vv">'+esc(t.ver)+'</span></span>'+(c==='start'?'<span class="flag">START</span>':'')+(c==='current'?'<span class="star">'+esc(t.ver)+'</span>':'')+'</button>'}
+function layout(){const st=document.getElementById('stage');if(!st)return;const W=st.clientWidth,n=T().length;if(!W||!n)return;const C=Math.max(2,Math.min(5,Math.floor(W/175-.5)));const off=W>760?66:2,w=Math.floor((W-off-(W>760?8:2))/(C+.5)),h=Math.round(w*1.1547),gap=6,ww=w-gap,hh=Math.round(ww*1.1547);const rows=Math.ceil(n/C);const pts=T().map((t,k)=>{const r=Math.floor(k/C);let c=k%C;if(r%2)c=C-1-c;return{x:off+c*w+(r%2?w/2:0),y:(rows-1-r)*h*.75}});
+ const ci=curI();let html=T().map((t,k)=>tile(t,k,ww,hh,pts[k].x+gap/2,pts[k].y+gap/2)).join('');
+ for(let k=0;k<n-1;k++){const a=pts[k],b=pts[k+1],mx=(a.x+b.x)/2+w/2,my=(a.y+b.y)/2+h/2,ang=Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI;html+='<span class="chev'+(ci>=0&&k>=ci?' fut':'')+'" style="left:'+mx.toFixed(1)+'px;top:'+my.toFixed(1)+'px;transform:rotate('+ang.toFixed(1)+'deg);animation-delay:'+(k*.16).toFixed(2)+'s"></span>'}
+ const pl=document.getElementById('plane');pl.style.setProperty('--w',ww+'px');pl.style.height=Math.round((rows-1)*h*.75+h+8)+'px';pl.innerHTML=html;st.classList.toggle('tilt',W>900)}
+function counts(){return{ships:T().filter(x=>x.kind==='shipped').length,wip:T().filter(x=>x.kind==='wip').length,pl:T().filter(x=>x.kind==='planned').length}}
+function panel(){const t=T().find(x=>x.id===sel)||T()[0];if(!t)return'<p class="msg">No sectors yet. Turn on Edit roadmap and add one.</p>';const k=idx(t.id),c=t.kind,n=counts();
+ return '<section class="panel" aria-live="polite"><div class="emb"><span class="fr"></span><span class="fc"><span>STPT</span><b>'+(k+1)+'</b><span>'+esc(KIND[c]||c)+'</span></span></div><div class="pt"><div class="ban '+esc(c)+'">'+esc(BAN[c]||c)+' &#187;</div><h2>'+esc(t.title)+'</h2><div class="meta">'+esc(t.ver)+' · '+esc(t.cat)+(t.tag?' · '+esc(t.tag):'')+'</div><p>'+esc(t.summary)+'</p>'+checks(t)+(t.details&&t.details.length?'<details class="what"><summary>What we added</summary><ul>'+t.details.map(d=>'<li>'+esc(d)+'</li>').join('')+'</ul></details>':'')+'<div class="ph">'+[t.img,t.img2].filter(Boolean).map(i=>'<figure><img src="'+esc(src(i))+'" alt=""><figcaption>'+credit(i)+'</figcaption></figure>').join('')+'</div>'+(t.source?'<div class="src">Source: '+esc(t.source)+'</div>':'')+'<div class="nav"><button class="btn sm" id="prev"'+(k<=0?' disabled':'')+'>&#8592; Previous</button><button class="btn sm" id="next"'+(k>=T().length-1?' disabled':'')+'>Next &#8594;</button>'+(edit?'<button class="btn sm" data-edit="'+esc(t.id)+'">Edit</button><button class="btn sm" data-mv="-1">Move earlier</button><button class="btn sm" data-mv="1">Move later</button><button class="btn sm warn" data-del="'+esc(t.id)+'">Delete</button>':'')+'</div></div><div><div class="bank"><span class="fr"></span><span class="fc"><b>'+esc(S.meta.current)+'</b><span>CURRENT BUILD</span></span></div><ul class="facts"><li>Founded<b>'+esc(S.meta.founded)+'</b></li><li>Builds<b>'+esc(S.meta.builds)+'</b></li>'+(()=>{if(CK.mode!=='live'&&CK.mode!=='local')return '<li>Online<b>'+n.ships+'</b></li><li>In work<b>'+n.wip+'</b></li>';const L=itemsOf(t.id),c=cnt(L);return '<li>Working<b style="color:var(--grn)">'+c.ok+'</b></li><li>Broken<b style="color:#ff6b5e">'+c.bad+'</b></li><li>Not tested<b style="color:#c9d3d8">'+c.open+'</b></li><li>Flagged<b style="color:var(--cyn)">'+L.filter(i=>repsOf(i.id).length).length+'</b></li>'})()+'</ul></div></section>'}
+function render(){const n=counts();const used=[...new Set(T().flatMap(t=>[t.img,t.img2]).filter(Boolean))];
+ const st=LOCAL?'Local copy: edits save in this browser. Export to share them.':CK.admin?'Changes save for the whole team as you make them.':'';
+ root.innerHTML=BG+'<div class="app"><header class="wrap top"><div class="brand"><b>MODERN F-15E</b><span>ROADMAP</span><small>Dev team only. Founded '+esc(S.meta.founded)+', now at '+esc(S.meta.current)+'. Dev and test tracker: click a sector to see what works, what is broken and who is on it.</small></div><div class="chips"><span id="hud" class="chips">'+hud()+'</span><span id="who" class="chips">'+who()+'</span><button class="btn'+(edit?' on':'')+'" id="ed" aria-pressed="'+edit+'"'+(LOCAL||CK.admin?'':' hidden')+'>'+(edit?'Done editing':'Edit roadmap')+'</button><button class="btn" id="ex">Export / import</button></div></header>'
+ +'<div class="wrap">'+(edit?'<div class="edbar"><button class="btn" id="add">Add sector</button>'+(undo.length?'<button class="btn" id="un">Undo</button>':'')+'<span class="msg">Select a sector to edit, move or delete it.</span></div>':'')+'<p class="msg" role="status">'+esc(msg||st)+'</p><div class="stage" id="stage"><div class="plane" id="plane"></div></div><div id="pan">'+panel()+'</div><section class="iss" id="iss" aria-label="Needs attention">'+issues()+'</section>'
+ +'<div class="plist">'+T().map((t,k)=>'<article class="pc">'+(t.img?'<img src="'+esc(src(t.img))+'" alt="">':'')+'<div><em>STPT '+(k+1)+' · '+esc(KIND[t.kind]||t.kind)+' · '+esc(t.ver)+'</em><h4>'+esc(t.title)+'</h4>'+esc(t.summary)+'<ul>'+((CK.mode==='live'||CK.mode==='local')&&itemsOf(t.id).length?itemsOf(t.id).map(i=>'<li><span class="st '+esc(i.status)+'">'+(MK[i.status]||MK.open)+'</span> '+esc(i.text)+(i.note?' ('+esc(i.note)+')':'')+'</li>').join(''):t.details.map(d=>'<li>'+esc(d)+'</li>').join(''))+'</ul></div></article>').join('')+'</div>'
+ +'<footer class="foot"><h3>Sources and photo credits</h3><p>'+esc(S.meta.note)+'</p><ol>'+used.map(k=>'<li>'+credit(k)+'</li>').join('')+'</ol></footer></div></div><dialog id="frm"></dialog>';
+ layout();sitRun();if(ro)ro.disconnect();ro=new ResizeObserver(()=>layout());ro.observe(document.getElementById('stage'))}
+function select(id){sel=id;document.getElementById('pan').innerHTML=panel();layout()}
+function doc(){const css=document.getElementById('css').textContent,main=document.getElementById('main').textContent,j=JSON.stringify(S).replace(/</g,'\\u003c');return '<!DOCTYPE html><html lang="en"><head>'+HEAD+'<style id="css">'+css+'</style></head><body><div id="root"></div><script type="application/json" id="data">'+j+'<\/script><script id="main">'+main+'<\/script></body></html>'}
+function persist(){S.meta.updated=new Date().toISOString().slice(0,10);try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+ if(!LOCAL)saveRoad()}
+function commit(fn){undo.push(JSON.stringify(S));if(undo.length>30)undo.shift();fn();persist();render()}
+function imgOpts(v){const ks=[...new Set([...Object.keys(S.credits),...T().flatMap(t=>[t.img,t.img2]).filter(Boolean)])];return '<option value="">None</option>'+ks.map(k=>'<option value="'+esc(k)+'"'+(k===v?' selected':'')+'>'+esc(/^(\/_blob\/|photo:)/.test(k)?'Uploaded photo':k)+'</option>').join('')}
+function tileForm(id){const t=T().find(x=>x.id===id)||{id:'',kind:'planned',title:'',ver:'Next',tag:'',cat:'Avionics',img:'maneuver',img2:'',summary:'',details:[],source:''};const f=document.getElementById('frm');
+ f.innerHTML='<form class="f" id="tf"><h3>'+(id?'Edit sector':'Add sector')+'</h3><label class="full">Title<input id="f-title" required value="'+esc(t.title)+'"></label><label>Status<select id="f-kind">'+Object.entries(KIND).map(([k,v])=>'<option value="'+k+'"'+(k===t.kind?' selected':'')+'>'+v+'</option>').join('')+'</select></label><label>Version label<input id="f-ver" value="'+esc(t.ver)+'"></label><label>Ribbon<input id="f-tag" value="'+esc(t.tag)+'" placeholder="New weapon"></label><label>Category<select id="f-cat">'+CATS.map(c=>'<option'+(c===t.cat?' selected':'')+'>'+c+'</option>').join('')+'</select></label><label>Main photo<select id="f-img">'+imgOpts(t.img)+'</select></label><label>Second photo<select id="f-img2">'+imgOpts(t.img2)+'</select></label><img class="prev full" id="f-prev" src="'+esc(src(t.img))+'" alt="">'+(FB&&CK.admin?'<label class="full">Upload a photo (sets the main photo)<input type="file" id="f-up" accept="image/*"></label>':'')+'<label class="full">Summary<textarea id="f-sum" style="min-height:70px">'+esc(t.summary)+'</textarea></label><label class="full">Details, one per line<textarea id="f-det">'+esc(t.details.join('\n'))+'</textarea></label><label class="full">Source<input id="f-src" value="'+esc(t.source)+'"></label><div class="row full"><button type="button" class="btn" data-close>Cancel</button><button class="btn on">Save</button></div></form>';
+ f.showModal();f.querySelector('#f-img').onchange=e=>{f.querySelector('#f-prev').src=src(e.target.value)};
+ const up=f.querySelector('#f-up');if(up)up.onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const r={url:await photoUpload(file)};const s=f.querySelector('#f-img');s.insertAdjacentHTML('beforeend','<option value="'+esc(r.url)+'">Uploaded photo</option>');s.value=r.url;f.querySelector('#f-prev').src=src(r.url)}catch(err){up.insertAdjacentHTML('afterend','<span>Upload failed.</span>')}};
+ f.querySelector('#tf').onsubmit=e=>{e.preventDefault();const v=x=>f.querySelector(x).value.trim();const n={id:id||('t'+Date.now().toString(36)),kind:v('#f-kind'),title:v('#f-title'),ver:v('#f-ver'),tag:v('#f-tag'),cat:v('#f-cat'),img:v('#f-img'),img2:v('#f-img2'),summary:v('#f-sum'),details:v('#f-det').split('\n').map(s=>s.trim()).filter(Boolean),source:v('#f-src')};f.close();commit(()=>{const k=idx(id);if(k>=0)S.tiles[k]=n;else{const ci=curI();S.tiles.splice(n.kind==='planned'||ci<0?S.tiles.length:ci,0,n)}if(n.kind==='current')S.meta.current=n.ver;sel=n.id})}}
+function exportForm(){const f=document.getElementById('frm');f.innerHTML='<form class="f" id="xf"><h3>Export or import</h3><p class="full" style="margin:0">Copy this text to back up the roadmap or send it to a teammate. To import, paste roadmap text and press Load.</p><label class="full">Roadmap data<textarea id="x-t" style="min-height:260px;font-size:13px">'+esc(JSON.stringify(S,null,1))+'</textarea></label><p class="full msg" id="x-m"></p><div class="row full"><button type="button" class="btn" data-close>Close</button><button type="button" class="btn" id="x-c">Copy</button><button class="btn on">Load</button></div></form>';f.showModal();
+ f.querySelector('#x-c').onclick=()=>{navigator.clipboard.writeText(f.querySelector('#x-t').value).then(()=>{f.querySelector('#x-m').textContent='Copied.'},()=>{f.querySelector('#x-t').select();f.querySelector('#x-m').textContent='Copy blocked here: the text is selected, press Ctrl+C.'})};
+ f.querySelector('#xf').onsubmit=e=>{e.preventDefault();try{const o=JSON.parse(f.querySelector('#x-t').value);if(!o||!Array.isArray(o.tiles)||!o.meta)throw 0;f.close();commit(()=>{o.credits=Object.assign({},S.credits,o.credits);o.imgmap=Object.assign({},S.imgmap,o.imgmap);S=o})}catch(err){f.querySelector('#x-m').textContent='That text is not roadmap data.'}}}
+function step(d){const k=idx(sel)+d;if(k>=0&&k<T().length)select(T()[k].id)}
+root.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+ if(d.close!==undefined){b.closest('dialog').close();return}
+ if(d.i){select(d.i);if(innerWidth<=760)document.getElementById('pan').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});return}
+ if(ckClick(b,d))return;
+ if(d.edit){tileForm(d.edit);return}
+ if(d.del){const t=T().find(x=>x.id===d.del);msg='Deleted '+(t?t.title:'sector')+'. Undo brings it back.';commit(()=>{const k=idx(d.del);S.tiles.splice(k,1);sel=(S.tiles[Math.max(0,k-1)]||{}).id});return}
+ if(d.mv){commit(()=>{const k=idx(sel),j=k+ +d.mv;if(j>=0&&j<S.tiles.length)[S.tiles[k],S.tiles[j]]=[S.tiles[j],S.tiles[k]]});return}
+ switch(b.id){case'ed':edit=!edit;msg='';render();break;case'add':tileForm('');break;case'un':if(undo.length){S=JSON.parse(undo.pop());msg='Undone.';persist();render()}break;case'ex':exportForm();break;case'prev':step(-1);break;case'next':step(1);break}});
+root.addEventListener('submit',e=>{const f=e.target;if(f.dataset&&f.dataset.form){e.preventDefault();ckSubmit(f)}});
+document.addEventListener('keydown',e=>{if(document.querySelector('dialog[open]')||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;if(e.key==='ArrowRight')step(1);if(e.key==='ArrowLeft')step(-1)});
+render();
+if(!LOCAL)ckInit();
+}</script></body></html>
