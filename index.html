@@ -191,7 +191,7 @@ details.what summary{cursor:pointer;color:var(--gold);font-weight:600}
 .iss small{display:block;color:var(--mut)}
 @media(max-width:760px){.ck li{grid-template-columns:30px minmax(0,1fr)}.cka{grid-column:1/-1;align-items:flex-start}.grp{justify-content:flex-start}.mk{width:28px;height:28px;font-size:16px}}
 @media print{.iss{display:none!important}.pc .st{font-weight:700}.pc .st.ok{color:#1d7a32}.pc .st.bad{color:#b3261e}.pc ul{list-style:none;padding-left:0}}
-.who{gap:10px}.who b{font:600 15px/1 Barlow,sans-serif;max-width:220px;overflow:hidden;text-overflow:ellipsis}
+.who{gap:10px;cursor:pointer}.who:hover{border-color:var(--gold)}.who b{font:600 15px/1 Barlow,sans-serif;max-width:220px;overflow:hidden;text-overflow:ellipsis}
 .tmh{margin:4px 0 6px;font:700 18px/1 "Barlow Condensed",sans-serif}
 .tm{list-style:none;margin:0;padding:0;border-top:1px solid var(--edge)}
 .tm li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--edge);flex-wrap:wrap}
@@ -418,7 +418,7 @@ function applyTeam(t){TEAM=t;const em=myEmail();CK.admin=!!(t&&(t.admins||[]).in
 async function ckInit(){FB=await fbReady();if(!FB){CK.mode='off';CK.err='setup';refresh();return}db=dbA;
  FB.U.onAuthStateChanged(FB.auth,async u=>{unsubAll();ME=u;CK.items={};CK.reports={};CK.log=[];TEAM=null;CK.admin=CK.tester=CK.owner=false;CK.reqSent=false;RQ={};SKIP=[];
   if(!u){CK.me=null;CK.mode='signin';refresh();return}
-  CK.me=u.uid;CK.names[u.uid]=u.displayName||'';CK.mode='wait';refresh();const em=myEmail();
+  CK.me=u.uid;CK.mode='wait';refresh();const em=myEmail();
   let t=null;try{const s=await FB.F.getDoc(FB.F.doc(FB.fs,'config/team'));t=s.exists()?s.data():null}catch(x){t=null}
   if(!t&&new URLSearchParams(location.search).get('claim')==='1'){const n={owner:em,admins:[em],testers:[]};try{await FB.F.setDoc(FB.F.doc(FB.fs,'config/team'),n);t=n;say('You are now the owner of this tracker.')}catch(x){}}
   if(!t){CK.mode='noaccess';try{const r=await FB.F.getDoc(FB.F.doc(FB.fs,'requests/'+u.uid));CK.reqSent=r.exists()}catch(x){}refresh();return}
@@ -433,14 +433,14 @@ async function ckInit(){FB=await fbReady();if(!FB){CK.mode='off';CK.err='setup';
   UNS.push(FB.F.onSnapshot(FB.F.doc(FB.fs,'config/seeded'),s=>{SKIP=(s.exists()&&s.data().skip)||[];refresh()},()=>{}));
   UNS.push(FB.F.onSnapshot(FB.F.doc(FB.fs,'config/roadmap'),s=>{if(!s.exists())return;const j=s.data().json;if(!j||j===lastRoad)return;try{const o=JSON.parse(j);if(o&&Array.isArray(o.tiles)&&o.meta){lastRoad=j;o.credits=Object.assign({},S.credits,o.credits);S=o;if(!T().some(x=>x.id===sel)){const c=T().find(x=>x.kind==='current');sel=c?c.id:(T()[0]||{}).id}render()}}catch(e){}},()=>{}));
   if(CK.admin)watchReq();
-  const nmv=u.displayName||em.split('@')[0];if(CK.tester)FB.F.setDoc(FB.F.doc(FB.fs,'people/'+u.uid),{name:nmv,email:em},{merge:true}).catch(()=>{});
+  if(CK.tester){const pr=FB.F.doc(FB.fs,'people/'+u.uid);FB.F.getDoc(pr).then(d=>{const v=d.exists()?d.data():{};const o={email:em};if(!v.name)o.name=(u.displayName||em.split('@')[0]).split(' ')[0];return FB.F.setDoc(pr,o,{merge:true})}).catch(()=>{})}
  })}
 function watchReq(){UNS.push(FB.F.onSnapshot(FB.F.collection(FB.fs,'requests'),s=>{RQ={};s.docs.forEach(d=>{RQ[d.id]=d.data()});refresh()},()=>{}))}
 async function names(){}
 function signIn(){if(!FB)return;const p=new FB.U.GoogleAuthProvider();p.setCustomParameters({prompt:'select_account'});FB.U.signInWithPopup(FB.auth,p).catch(e=>{const c=(e&&e.code)||String(e);if(/popup-blocked/.test(c))say('Your browser blocked the Google sign-in window. Allow pop-ups for this site, then press Sign in again.');else if(!/popup-closed|cancelled-popup/.test(c))say('Sign-in failed ('+c+'). Try again, or open the site in Chrome, Edge or Firefox.')})}
 function who(){if(LOCAL){const n=suggestions().length;return n?'<button class="btn" id="sugg">New checks ('+n+')</button>':''}if(!FB)return '';if(!ME)return '<button class="btn" id="signin">Sign in with Google</button>';
  const n=CK.admin?suggestions().length:0;
- return '<span class="chip who"><b>'+esc(ME.displayName||myEmail())+'</b>'+(CK.owner?'Owner':CK.admin?'Dev':CK.tester?'Tester':'No access')+'</span>'+(CK.admin?'<button class="btn" id="team">Team'+(Object.keys(RQ).length?' ('+Object.keys(RQ).length+')':'')+'</button>':'')+(n?'<button class="btn" id="sugg">New checks ('+n+')</button>':'')+'<button class="btn sm" id="signout">Sign out</button>'}
+ return '<button type="button" class="chip who" id="myname" title="Change the name the team sees"><b>'+esc(CK.names[CK.me]||'Set your name')+'</b>'+(CK.owner?'Owner':CK.admin?'Dev':CK.tester?'Tester':'No access')+'</button>'+(CK.admin?'<button class="btn" id="team">Team'+(Object.keys(RQ).length?' ('+Object.keys(RQ).length+')':'')+'</button>':'')+(n?'<button class="btn" id="sugg">New checks ('+n+')</button>':'')+'<button class="btn sm" id="signout">Sign out</button>'}
 function seedChecks(){if(!CK.admin||!FB)return;const b=FB.F.writeBatch(FB.fs);let n=0;T().forEach(t=>(t.checks||[]).forEach((x,i)=>{const c=parseCk(x);b.set(FB.F.doc(FB.fs,'items/'+t.id+'-'+(i+1)),{tile:t.id,text:c.text,perf:c.perf,order:i+1,status:'open',note:'',ver:'',by:'',at:''});n++}));b.commit().then(()=>{say('Loaded '+n+' starting checks.');logAct({kind:'team',text:'loaded the starting checklist ('+n+' checks)'})}).catch(fail)}
 function suggForm(){if(!CK.admin)return;const f=document.getElementById('frm'),L=suggestions();if(!L.length){if(f.open)f.close();return}const by={};L.forEach((x,i)=>{(by[x.tile]=by[x.tile]||[]).push([x,i])});
  f.innerHTML='<form class="f" id="sgf"><h3>New checks ('+L.length+')</h3><p class="full" style="margin:0;color:var(--mut)">Checks from the latest page update that are not on the tracker yet. Untick any you don&#39;t want, then add the rest. <span class="pf">Performance</span> marks FPS and smoothness checks.</p><div class="full sgl">'
@@ -453,7 +453,7 @@ function suggForm(){if(!CK.admin)return;const f=document.getElementById('frm'),L
   f.close();if(LOCAL){docs.forEach(([id,v])=>{CK.items[id]=v});saveLocal();refresh();logAct({kind:'team',text:'added '+docs.length+' new suggested checks'});return}
   const b=FB.F.writeBatch(FB.fs);docs.forEach(([id,v])=>b.set(FB.F.doc(FB.fs,'items/'+id),v));b.commit().then(()=>{say('Added '+docs.length+' new checks.');logAct({kind:'team',text:'added '+docs.length+' new suggested checks'})}).catch(e=>fail(fbErr(e)))}}
 function saveRoad(){if(!FB||!CK.admin)return;const j=JSON.stringify(S);lastRoad=j;msg='Saving for the team…';FB.F.setDoc(FB.F.doc(FB.fs,'config/roadmap'),{json:j,at:nowI(),by:CK.me}).then(()=>say('Saved for the team.')).catch(e=>fail(fbErr(e)))}
-const pname=e=>!e?'':EMN[e]?esc(EMN[e])+' <span class="tme">'+esc(e)+'</span>':esc(e);
+const pname=e=>!e?'':EMN[e]?'<span title="'+esc(e)+'">'+esc(EMN[e])+'</span>':esc(e);const tlbl=e=>EMN[e]||e;
 function teamForm(){if(!CK.admin||!TEAM)return;const f=document.getElementById('frm'),t=TEAM,rq=Object.entries(RQ),me=myEmail();
  const devs=(t.admins||[]).filter(e=>e!==t.owner),tst=t.testers||[];
  const li=(e,kind)=>'<li><span>'+pname(e)+(e===me?' <em>you</em>':'')+'</span>'+(e!==t.owner&&e!==me?'<span><button type="button" class="btn sm" data-tm-mv="'+(kind==='admins'?'testers':'admins')+'|'+esc(e)+'">'+(kind==='admins'?'Make tester':'Make dev')+'</button> <button type="button" class="btn sm warn" data-tm-del="'+kind+'|'+esc(e)+'">Remove</button></span>':'')+'</li>';
@@ -465,8 +465,10 @@ function teamForm(){if(!CK.admin||!TEAM)return;const f=document.getElementById('
  +'<label>Google email<input id="tm-e" type="email" autocomplete="off" placeholder="name@gmail.com"></label><label>Role<select id="tm-r"><option value="testers">Tester</option><option value="admins">Dev</option>'+(CK.owner?'<option value="owner">Owner (you become a dev)</option>':!t.owner?'<option value="owner">Owner</option>':'')+'</select></label><p class="full msg" id="tm-m"></p><div class="row full"><button type="button" class="btn" data-close>Close</button><button class="btn on" id="tm-add">Add</button></div></form>';
  if(!f.open)f.showModal();
  f.querySelector('#tmf').onsubmit=e=>{e.preventDefault();const em=f.querySelector('#tm-e').value.trim().toLowerCase(),k=f.querySelector('#tm-r').value,m=f.querySelector('#tm-m'),btn=f.querySelector('#tm-add');if(!isEmail(em)){m.textContent='Enter a full email address.';return}
-  if(k==='owner'){if(em===t.owner){m.textContent='That account is already the owner.';return}if(btn.dataset.sure!==em){btn.dataset.sure=em;btn.textContent='Click again to hand over';m.textContent=em+' becomes the owner.'+(CK.owner?' You stay a dev with full control.':'');return}teamSave(n=>{n.owner=em;if(!n.admins.includes(em))n.admins.push(em);n.testers=n.testers.filter(x=>x!==em)},'made '+em+' the owner');return}
-  teamSave(n=>setRole(n,em,k),'added '+em+' as '+(k==='admins'?'dev':'tester'))}}
+  if(k==='owner'){if(em===t.owner){m.textContent='That account is already the owner.';return}if(btn.dataset.sure!==em){btn.dataset.sure=em;btn.textContent='Click again to hand over';m.textContent=em+' becomes the owner.'+(CK.owner?' You stay a dev with full control.':'');return}teamSave(n=>{n.owner=em;if(!n.admins.includes(em))n.admins.push(em);n.testers=n.testers.filter(x=>x!==em)},'made '+tlbl(em)+' the owner');return}
+  teamSave(n=>setRole(n,em,k),'added '+tlbl(em)+' as '+(k==='admins'?'dev':'tester'))}}
+function nameForm(){if(!FB||!ME||!CK.tester)return;const f=document.getElementById('frm');f.innerHTML='<form class="f" id="nmf"><h3>Your display name</h3><p class="full" style="margin:0;color:var(--mut)">This is the name the team sees on your results, in Who did what and in the team list. Your Google account name is never shown.</p><label class="full">Display name<input id="nm-v" maxlength="40" required value="'+esc(CK.names[CK.me]||'')+'"></label><p class="full msg" id="nm-m"></p><div class="row full"><button type="button" class="btn" data-close>Cancel</button><button class="btn on">Save</button></div></form>';f.showModal();
+ f.querySelector('#nmf').onsubmit=e=>{e.preventDefault();const v=f.querySelector('#nm-v').value.trim().slice(0,40);if(!v)return;FB.F.setDoc(FB.F.doc(FB.fs,'people/'+ME.uid),{name:v,email:myEmail()},{merge:true}).then(()=>{CK.names[CK.me]=v;EMN[myEmail()]=v;f.close();refresh();say('The team now sees you as '+v+'.')}).catch(x=>{f.querySelector('#nm-m').textContent='Could not save ('+((x&&x.code)||x)+').'})}}
 function setRole(n,em,k){if(n.owner&&em===n.owner)return;n.admins=n.admins.filter(x=>x!==em);n.testers=n.testers.filter(x=>x!==em);n[k].push(em)}
 function teamSave(mut,what){const n=JSON.parse(JSON.stringify(TEAM));n.admins=n.admins||[];n.testers=n.testers||[];mut(n);FB.F.setDoc(FB.F.doc(FB.fs,'config/team'),n).then(()=>{applyTeam(n);if(what)logAct({kind:'team',text:what});if(CK.admin)teamForm();else{const f=document.getElementById('frm');if(f.open)f.close()}refresh()}).catch(e=>{const m=document.getElementById('tm-m');if(m)m.textContent='Could not save ('+((e&&e.code)||e)+').'})}
 function photoUpload(file){return new Promise((res,rej)=>{const im=new Image(),u=URL.createObjectURL(file);im.onload=()=>{const k=Math.min(1,1400/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);let q=.82,d=c.toDataURL('image/jpeg',q);while(d.length>900000&&q>.4){q-=.12;d=c.toDataURL('image/jpeg',q)}const id='p'+Date.now().toString(36);FB.F.setDoc(FB.F.doc(FB.fs,'photos/'+id),{url:d,at:nowI(),by:CK.me}).then(()=>{PHOTOS[id]=d;res('photo:'+id)}).catch(rej)};im.onerror=rej;im.src=u})}
@@ -522,12 +524,13 @@ function ckClick(b,d){
  if(b.id==='signin'||d.signin){signIn();return true}
  if(b.id==='signout'){if(FB)FB.U.signOut(FB.auth);return true}
  if(b.id==='team'){teamForm();return true}
+ if(b.id==='myname'){nameForm();return true}
  if(b.id==='sugg'){suggForm();return true}
- if(d.req){if(FB&&ME)FB.F.setDoc(FB.F.doc(FB.fs,'requests/'+ME.uid),{email:myEmail(),name:ME.displayName||'',at:nowI()}).then(()=>{CK.reqSent=true;refresh()}).catch(e=>say('Could not send the request ('+((e&&e.code)||e)+').'));return true}
+ if(d.req){if(FB&&ME)FB.F.setDoc(FB.F.doc(FB.fs,'requests/'+ME.uid),{email:myEmail(),name:(ME.displayName||'').split(' ')[0],at:nowI()}).then(()=>{CK.reqSent=true;refresh()}).catch(e=>say('Could not send the request ('+((e&&e.code)||e)+').'));return true}
  if(d.seed){b.disabled=true;seedChecks();return true}
- if(d.tmDel){const [k,em]=d.tmDel.split('|');if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='Click to confirm';return true}teamSave(n=>{n[k]=n[k].filter(x=>x!==em)},'removed '+em+' from the team');return true}
- if(d.tmMv){const [k,em]=d.tmMv.split('|');teamSave(n=>setRole(n,em,k),'made '+em+' a '+(k==='admins'?'dev':'tester'));return true}
- if(d.rqOk){const [k,u]=d.rqOk.split('|'),r=RQ[u];if(!r)return true;const em=String(r.email||'').toLowerCase();if(em&&k==='owner')teamSave(n=>{n.owner=em;if(!n.admins.includes(em))n.admins.push(em);n.testers=n.testers.filter(x=>x!==em)},'made '+em+' the owner');else if(em)teamSave(n=>setRole(n,em,k),'added '+em+' as '+(k==='admins'?'dev':'tester'));FB.F.deleteDoc(FB.F.doc(FB.fs,'requests/'+u)).catch(()=>{});return true}
+ if(d.tmDel){const [k,em]=d.tmDel.split('|');if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='Click to confirm';return true}teamSave(n=>{n[k]=n[k].filter(x=>x!==em)},'removed '+tlbl(em)+' from the team');return true}
+ if(d.tmMv){const [k,em]=d.tmMv.split('|');teamSave(n=>setRole(n,em,k),'made '+tlbl(em)+' a '+(k==='admins'?'dev':'tester'));return true}
+ if(d.rqOk){const [k,u]=d.rqOk.split('|'),r=RQ[u];if(!r)return true;const em=String(r.email||'').toLowerCase();if(em&&k==='owner')teamSave(n=>{n.owner=em;if(!n.admins.includes(em))n.admins.push(em);n.testers=n.testers.filter(x=>x!==em)},'made '+tlbl(em)+' the owner');else if(em)teamSave(n=>setRole(n,em,k),'added '+tlbl(em)+' as '+(k==='admins'?'dev':'tester'));FB.F.deleteDoc(FB.F.doc(FB.fs,'requests/'+u)).catch(()=>{});return true}
  if(d.rqNo){FB.F.deleteDoc(FB.F.doc(FB.fs,'requests/'+d.rqNo)).catch(()=>{});delete RQ[d.rqNo];teamForm();return true}
  if(d.f){flt=d.f;refresh();return true}
  if(d.go){select(d.go);document.getElementById('pan').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});return true}
