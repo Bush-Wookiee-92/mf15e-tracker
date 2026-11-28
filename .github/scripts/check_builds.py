@@ -5,12 +5,15 @@ Runs in GitHub Actions (see ../workflows/watch-builds.yml), never on anyone's PC
   TESTER_TOKEN repository secret.
 - Stable and Preview builds: the public repo 65thhaack/Modern-F15E-Mod.
 build.json is only rewritten when a version changes, so the repo is not spammed.
+When Stable moves past the version in autoreset.json, it sets the new_stable output and the
+workflow runs auto_reset.py, which resets the tracker like a dev's Reset button.
 """
 import json, os, re, sys, urllib.request, urllib.error
 
 TESTER_REPO = "65thhaack/Modern-F15e-Mod-Testers"
 PUBLIC_REPO = "65thhaack/Modern-F15E-Mod"
 OUT = "build.json"
+MARK = "autoreset.json"  # the Stable build the tracker was last reset for (see auto_reset.py)
 
 
 def releases(repo, token=None):
@@ -89,6 +92,22 @@ def main():
         print("New builds:", changed)
     else:
         print("No new builds.", {k: new.get(k) for k in ("tester", "stable", "preview")})
+    # A newer Stable build than the last automatic reset → tell the workflow to reset the tracker.
+    stable = new.get("stable")
+    mark = {}
+    if os.path.exists(MARK):
+        with open(MARK, encoding="utf-8") as f:
+            mark = json.load(f)
+    if stable and not mark.get("stable"):
+        with open(MARK, "w", encoding="utf-8") as f:  # first run: remember today's Stable, reset nothing
+            json.dump({"stable": stable, "at": "", "skipped": True}, f, indent=1)
+            f.write("\n")
+    elif stable and vkey(stable) > vkey(mark["stable"]):
+        print(f"Stable went from {mark['stable']} to {stable}: the tracker will be reset.")
+        out = os.environ.get("GITHUB_OUTPUT")
+        if out:
+            with open(out, "a", encoding="utf-8") as f:
+                f.write(f"new_stable={stable}\ntester={new.get('tester', '')}\n")
     # Fail the run (so it shows red in Actions) only if the tester check could not run at all.
     if any(p.startswith(("TESTER_TOKEN", "Tester repo")) for p in problems):
         sys.exit(1)

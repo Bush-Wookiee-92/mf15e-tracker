@@ -497,7 +497,7 @@ if(LOCAL){CK.me='local';CK.names.local='You';CK.admin=CK.tester=CK.owner=true;
 const nowI=()=>new Date().toISOString(),uidN=()=>'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const fmtD=s=>{const d=new Date(s);return isNaN(d)?'':d.toLocaleDateString(undefined,{day:'numeric',month:'short'})};
 const fmtDT=s=>{const d=new Date(s);return isNaN(d)?'':d.toLocaleDateString(undefined,{day:'numeric',month:'short'})+' '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})};
-const nm=id=>id===CK.me?'You':(CK.names[id]||'Someone');
+const nm=id=>id===CK.me?'You':id==='auto'?'Build watcher':(CK.names[id]||'Someone');
 const isEmail=e=>/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e);
 function itemsOf(tid){return Object.entries(CK.items).filter(([k,v])=>v&&v.tile===tid).map(([id,v])=>Object.assign({id},v)).sort((a,b)=>(a.order||0)-(b.order||0)||a.id.localeCompare(b.id))}
 const MODES=[['vr','VR'],['d2','2D'],['pilot','Pilot'],['wso','WSO'],['mc','Multicrew']],MS={ok:'&#10003;',bad:'&#10007;'};
@@ -609,7 +609,7 @@ async function checkBuild(){let b=null;for(const u of ['https://raw.githubuserco
 function applyBuild(){if(!LATEST||!LATEST.tester||!vnewer(LATEST.tester,S.meta.current))return;const v=LATEST.tester;S.meta.current=v;const c=T().find(t=>t.kind==='current');if(c){c.ver=v;if(/^Version /.test(c.title))c.title='Version '+v}render();msg='New tester build '+v+' is out. New results are stamped with '+v+'.';say(msg);BUILD_PENDING=true;saveBuild()}
 function saveBuild(){if(!BUILD_PENDING||LOCAL||!FB||!CK.admin||CK.mode!=='live')return;BUILD_PENDING=false;saveRoad('Tester build '+S.meta.current+' detected and saved for the team.');logAct({kind:'team',text:'tester build '+S.meta.current+' was detected automatically'})}
 function resetForm(){if(!CK.admin)return;const f=document.getElementById('frm');
- f.innerHTML='<form class="f" id="rsf"><h3>Reset the checklist</h3><p class="full" style="margin:0;color:var(--mut)">Use this when a new build goes out. Every check goes back to Not tested, and every tester result, flag, note and reported problem is cleared. This round&#39;s results are saved to Build history first. The sectors, photos and team are not touched.</p>'
+ f.innerHTML='<form class="f" id="rsf"><h3>Reset the checklist</h3><p class="full" style="margin:0;color:var(--mut)">Use this when a new build goes out. Every check goes back to Not tested, and every tester result, flag, note and reported problem is cleared. This round&#39;s results are saved to Build history first. The sectors, photos and team are not touched.</p><p class="full" style="margin:0;color:var(--mut)">You don&#39;t need this for Stable releases: the build watcher resets the checklist by itself within about 5 minutes of a new Stable build.</p>'
  +'<label class="full sgi"><input type="checkbox" id="rs-def"> Also restore the default checklist (removes checks added by hand and brings back default checks that were deleted)</label>'
  +'<label class="full sgi"><input type="checkbox" id="rs-log"> Also clear the Who did what history</label>'
  +'<label>Build being tested now<input id="rs-ver" value="'+esc(S.meta.current)+'"></label>'
@@ -638,7 +638,7 @@ function bhForm(id){const b=(CK.builds||[]).find(x=>x.id===id);if(!b)return;cons
  const del=f.querySelector('#bh-del');if(del)del.onclick=()=>{if(del.dataset.sure!=='1'){del.dataset.sure='1';del.textContent='Click again to delete';return}f.close();FB.F.deleteDoc(FB.F.doc(FB.fs,'builds/'+id)).then(()=>say('Deleted the record for build '+(b.build||'')+'.')).catch(e=>fail(fbErr(e)))}}
 async function doReset(def,clr){
  const snap=snapshotRound();if(snap.counts.ok+snap.counts.bad>0||Object.keys(snap.testers).length){if(LOCAL){CK.builds=[Object.assign({id:'b'+Date.now().toString(36)},snap)].concat(CK.builds||[])}else{const bid=String(snap.build||'build').replace(/[^0-9A-Za-z.-]/g,'')+'-'+Date.now().toString(36);await FB.F.setDoc(FB.F.doc(FB.fs,'builds/'+bid),snap)}}
-const blank={status:'open',note:'',ver:'',by:'',at:'',fixed:false,retest:false},sets=[],dels=[];
+const blank={status:'open',note:'',ver:'',by:'',at:'',fixed:false,retest:false,sev:''},sets=[],dels=[];
  if(def){T().forEach(t=>{const st=SEEDT.find(x=>x.id===t.id),D=((st&&st.checks)||t.checks||[]).map(parseCk),have=itemsOf(t.id),used=new Set();
   D.forEach((c,i)=>{const k=normT(c.text),it=have.find(x=>!used.has(x.id)&&normT(x.text)===k);if(it){used.add(it.id);sets.push([it.id,Object.assign({},CK.items[it.id],blank,{text:c.text,perf:c.perf,order:i+1})])}else sets.push([t.id+'-x'+hashT(k),Object.assign({tile:t.id,text:c.text,perf:c.perf,order:i+1,createdBy:''},blank)])});
   have.forEach(x=>{if(!used.has(x.id))dels.push(x.id)})})}

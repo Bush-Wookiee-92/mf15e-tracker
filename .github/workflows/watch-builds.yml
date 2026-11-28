@@ -2,10 +2,17 @@ name: Watch for new Modern F-15E builds
 
 # Runs on GitHub's servers every 5 minutes (GitHub may delay scheduled runs a little),
 # and can be started by hand from the Actions tab.
+# A new tester build updates build.json (the tracker's version follows it).
+# A new Stable build also resets the tracker (auto_reset.py), like a dev pressing Reset.
 on:
   schedule:
     - cron: "*/5 * * * *"
   workflow_dispatch:
+    inputs:
+      reset_dry_run:
+        description: "Test the automatic reset: read the tracker and print what a reset would do, without changing anything"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -21,16 +28,37 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Look up the newest builds
+        id: check
         env:
           TESTER_TOKEN: ${{ secrets.TESTER_TOKEN }}
         run: python3 .github/scripts/check_builds.py
 
-      - name: Publish build.json if a build changed
+      - name: Reset the tracker for the new Stable build
+        if: ${{ steps.check.outputs.new_stable != '' }}
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          NEW_STABLE: ${{ steps.check.outputs.new_stable }}
+          TESTER_BUILD: ${{ steps.check.outputs.tester }}
         run: |
-          if [ -n "$(git status --porcelain build.json)" ]; then
+          pip install --quiet firebase-admin
+          python3 .github/scripts/auto_reset.py
+
+      - name: Test the automatic reset (dry run, changes nothing)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.reset_dry_run }}
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          NEW_STABLE: test
+        run: |
+          pip install --quiet firebase-admin
+          python3 .github/scripts/auto_reset.py --dry-run
+
+      - name: Publish build.json and autoreset.json if they changed
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -n "$(git status --porcelain build.json autoreset.json)" ]; then
             git config user.name "build-watch"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add build.json
-            git commit -m "New build detected: $(python3 -c 'import json;d=json.load(open("build.json"));print(", ".join(k+" "+v for k,v in d.items()))')"
+            git add build.json autoreset.json
+            git commit -m "Build watch: $(python3 -c 'import json;d=json.load(open("build.json"));print(", ".join(k+" "+v for k,v in d.items()))')"
             git push
           fi
