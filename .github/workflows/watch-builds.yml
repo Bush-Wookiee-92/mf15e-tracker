@@ -1,6 +1,9 @@
 name: Watch for new Modern F-15E builds
 
-# Runs on GitHub's servers every 5 minutes (GitHub may delay scheduled runs a little),
+# Runs on GitHub's servers every 5 minutes. GitHub's own schedule below has not fired reliably, so a
+# Google Apps Script timer in Wookie's Google account ("MF15E tracker build watcher timer") also starts it
+# every 5 minutes through workflow_dispatch, using a key that can only start workflows here (expires 2027-11-26).
+# Only one run happens at a time (concurrency below), so the two triggers never clash.
 # and can be started by hand from the Actions tab (Actions > Watch for new Modern F-15E builds > Run workflow).
 # A new tester build updates build.json (the tracker's version follows it).
 # A new Stable build also resets the tracker (auto_reset.py), like a dev pressing Reset.
