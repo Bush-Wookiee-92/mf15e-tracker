@@ -259,7 +259,7 @@ function svgUrl(w,h,body){return 'url("data:image/svg+xml,'+encodeURIComponent('
 function topo(){const P=640,R=seeded(11);let p='';for(let c=0;c<7;c++){const cx=R()*P,cy=R()*P,n=4+(R()*6|0),b=16+R()*22,a1=R()*6.3,a2=R()*6.3;for(let k=1;k<=n;k++){const r=k*b;let d='';for(let a=0;a<=40;a++){const t=a/40*6.2832,rr=r*(1+.13*Math.sin(3*t+a1)+.07*Math.sin(5*t+a2));d+=(a?'L':'M')+(rr*Math.cos(t)).toFixed(1)+' '+(rr*Math.sin(t)).toFixed(1)}const e=r*1.25;for(const ox of[-P,0,P])for(const oy of[-P,0,P]){const x=cx+ox,y=cy+oy;if(x+e<0||x-e>P||y+e<0||y-e>P)continue;p+='<path transform="translate('+x.toFixed(1)+' '+y.toFixed(1)+')" d="'+d+'Z"/>'}}}return svgUrl(P,P,'<g fill="none" stroke="#d08a3c" stroke-opacity=".2">'+p+'</g>')}
 function lights(seed,n){const P=512,R=seeded(seed);let p='';for(let i=0;i<n;i++){const x=R()*P,y=R()*P,r=.6+R()*1.6,c=R()<.6?'#ff5a2a':R()<.5?'#ffbf3f':'#cfe8ff';p+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="'+c+'" fill-opacity="'+(.25+R()*.6).toFixed(2)+'"/>'}return svgUrl(P,P,p)}
 const HEXG=svgUrl(60,104,'<path d="M30 0L60 17.32V51.96L30 69.28L0 51.96V17.32ZM30 69.28V104" fill="none" stroke="#7ed68e" stroke-opacity=".22"/>');
-const SITP={fl:'M200 150C600 40 1100 60 1450 180S1560 700 1250 880S400 960 180 760S0 260 200 150Z',cap:'M60 240V400A60 60 0 0 0 180 400V240A60 60 0 0 0 60 240Z',cap2:'M1420 300V470A55 55 0 0 0 1530 470V300A55 55 0 0 0 1420 300Z',aw:'M1150 40H1440A30 30 0 0 1 1440 100H1150A30 30 0 0 1 1150 40Z',r1:'M1750 40C1400 90 1100 130 800 120C500 110 200 60 -150 120',r2:'M-150 1000C100 880 260 700 230 520C200 340 80 200 -150 150',r3:'M1750 1000C1600 860 1520 720 1470 580C1420 440 1500 260 1750 120',r4:'M-150 760C80 700 200 560 250 420C290 300 200 150 -150 60',gt:'M-150 60C150 150 220 400 130 600C60 760 150 900 -150 1060',gt2:'M1750 420C1520 330 1420 220 1320 80C1270 10 1220 -50 1150 -150',gt3:'M1750 -120C1580 140 1460 330 1500 540C1540 720 1680 840 1800 950',un:'M1330 -80C1250 300 1420 700 1300 1080',road:'M-120 975C0 950 90 905 170 880C250 855 330 820 420 780',sea:'M-60 20C0 -20 60 -40 120 -20C170 0 170 50 120 60C60 70 0 60 -60 20Z',sb2:'M260 -60C225 -25 190 5 140 25',r7:'M1750 -100C1500 150 1300 250 1000 300C700 350 400 300 -150 200',r8:'M900 1150C850 900 900 700 1050 560C1200 420 1450 380 1750 420',gt5:'M-150 500C150 480 400 430 650 330C900 230 1200 160 1750 120',gt6:'M-150 950C200 820 500 700 800 650C1100 600 1400 640 1750 700',oh3:'M1800 -1700C1400 -1300 1000 -1100 400 -1000C0 -920 -400 -1000 -900 -1300',of3:'M2400 2600C2700 2000 3000 1300 3300 700C3500 300 3700 0 4300 -300',gr2:'M1700 345C1640 345 1580 348 1530 350C1490 352 1480 380 1510 400C1560 420 1630 410 1700 405',gb2:'M1400 -50C1405 20 1412 100 1420 170C1425 200 1450 215 1500 210C1560 205 1620 195 1680 190',sr3:'M-260 -760C-220 -620 -180 -500 -140 -380',sb4:'M-720 -420C-600 -400 -480 -390 -360 -370',sb3:'M470 -270C410 -210 330 -130 260 -60',sr1:'M-560 -300C-470 -250 -380 -190 -300 -140C-270 -120 -250 -105 -235 -95',sr2:'M-640 170C-560 120 -470 70 -390 30C-350 10 -320 -2 -300 -10',gr:'M1280 1040C1250 980 1200 930 1150 890C1110 870 1090 900 1110 940C1130 980 1170 1020 1200 1070',gb:'M880 1040C890 990 905 940 930 895C955 860 990 880 990 920C990 960 975 1010 965 1070',r5:'M1750 560C1400 520 1100 600 800 640C500 680 200 620 -150 700',r6:'M-150 300C200 330 500 420 800 380C1100 340 1400 250 1750 300',gt4:'M600 1150C650 900 700 700 900 500C1100 300 1150 150 1200 -150',oh2:'M4300 -1300C3500 -1100 2800 -900 2200 -1200C1700 -1450 1000 -1400 300 -1500',of2:'M600 2500C1200 2200 1900 1900 2600 1700C3200 1500 3700 1100 4300 1000',ocap:'M300 -800H900A80 80 0 0 1 900 -640H300A80 80 0 0 1 300 -800Z',otk:'M2000 -300H2700A70 70 0 0 1 2700 -160H2000A70 70 0 0 1 2000 -300Z',ohc:'M3100 500V900A90 90 0 0 0 3280 900V500A90 90 0 0 0 3100 500Z',ohs:'M4300 2300C3600 2000 2800 1700 2300 1500C1900 1350 1800 1150 1950 1000C2200 820 3000 700 4300 900',ofs:'M-1800 1400C-1200 1100 -500 1300 -400 1800S-1100 2400 -1700 2200S-2400 1700 -1800 1400Z',oaw:'M-1700 300H-1200A60 60 0 0 1 -1200 420H-1700A60 60 0 0 1 -1700 300Z',ouk:'M3000 -1600C2700 -1100 2900 -700 2600 -300',ofp:'M600 1700H1300A120 120 0 0 1 1300 1940H600A120 120 0 0 1 600 1700Z',ohp:'M1800 -1100C2200 -1300 2700 -1200 2600 -900S2000 -700 1800 -1100Z',ocv:'M2900 1700C2800 1740 2700 1800 2620 1870C2700 1840 2820 1770 2900 1700Z',ocv2:'M3300 -620C3200 -560 3100 -500 3000 -440C3100 -480 3200 -540 3300 -620Z',osh:'M-1500 -850C-1380 -900 -1250 -880 -1230 -800C-1250 -730 -1400 -730 -1500 -850Z',osf:'M-200 -1120C-80 -1160 60 -1140 80 -1080C60 -1020 -80 -1020 -200 -1120Z'};
+const SITP={fl:'M200 150C600 40 1100 60 1450 180S1560 700 1250 880S400 960 180 760S0 260 200 150Z',cap:'M60 240V400A60 60 0 0 0 180 400V240A60 60 0 0 0 60 240Z',cap2:'M1420 300V470A55 55 0 0 0 1530 470V300A55 55 0 0 0 1420 300Z',aw:'M1150 40H1440A30 30 0 0 1 1440 100H1150A30 30 0 0 1 1150 40Z',r1:'M1750 40C1400 90 1100 130 800 120C500 110 200 60 -150 120',r2:'M-150 1000C100 880 260 700 230 520C200 340 80 200 -150 150',r3:'M1750 1000C1600 860 1520 720 1470 580C1420 440 1500 260 1750 120',r4:'M-150 760C80 700 200 560 250 420C290 300 200 150 -150 60',gt:'M-150 60C150 150 220 400 130 600C60 760 150 900 -150 1060',gt2:'M1750 420C1520 330 1420 220 1320 80C1270 10 1220 -50 1150 -150',gt3:'M1750 -120C1580 140 1460 330 1500 540C1540 720 1680 840 1800 950',un:'M1330 -80C1250 300 1420 700 1300 1080',road:'M60 930L170 880',sea:'M26 20C42 9 59 4 75 9C88 15 88 28 75 31C59 34 42 31 26 20Z',sb2:'M240 -40L190 0',r7:'M1750 -100C1500 150 1300 250 1000 300C700 350 400 300 -150 200',r8:'M900 1150C850 900 900 700 1050 560C1200 420 1450 380 1750 420',gt5:'M-150 500C150 480 400 430 650 330C900 230 1200 160 1750 120',gt6:'M-150 950C200 820 500 700 800 650C1100 600 1400 640 1750 700',oh3:'M1800 -1700C1400 -1300 1000 -1100 400 -1000C0 -920 -400 -1000 -900 -1300',of3:'M2400 2600C2700 2000 3000 1300 3300 700C3500 300 3700 0 4300 -300',gr2:'M1640 345L1530 352',gb2:'M1400 60L1420 170',sr3:'M-240 -700L-220 -628',sb4:'M-600 -400L-515 -385',sb3:'M420 -220L370 -170',sr1:'M-480 -250L-400 -200',sr2:'M-560 120L-500 85',gr:'M1230 990L1150 905',gb:'M860 1000L930 905',r5:'M1750 560C1400 520 1100 600 800 640C500 680 200 620 -150 700',r6:'M-150 300C200 330 500 420 800 380C1100 340 1400 250 1750 300',gt4:'M600 1150C650 900 700 700 900 500C1100 300 1150 150 1200 -150',oh2:'M4300 -1300C3500 -1100 2800 -900 2200 -1200C1700 -1450 1000 -1400 300 -1500',of2:'M600 2500C1200 2200 1900 1900 2600 1700C3200 1500 3700 1100 4300 1000',ocap:'M300 -800H900A80 80 0 0 1 900 -640H300A80 80 0 0 1 300 -800Z',otk:'M2000 -300H2700A70 70 0 0 1 2700 -160H2000A70 70 0 0 1 2000 -300Z',ohc:'M3100 500V900A90 90 0 0 0 3280 900V500A90 90 0 0 0 3100 500Z',ohs:'M4300 2300C3600 2000 2800 1700 2300 1500C1900 1350 1800 1150 1950 1000C2200 820 3000 700 4300 900',ofs:'M-1800 1400C-1200 1100 -500 1300 -400 1800S-1100 2400 -1700 2200S-2400 1700 -1800 1400Z',oaw:'M-1700 300H-1200A60 60 0 0 1 -1200 420H-1700A60 60 0 0 1 -1700 300Z',ouk:'M3000 -1600C2700 -1100 2900 -700 2600 -300',ofp:'M600 1700H1300A120 120 0 0 1 1300 1940H600A120 120 0 0 1 600 1700Z',ohp:'M1800 -1100C2200 -1300 2700 -1200 2600 -900S2000 -700 1800 -1100Z',ocv:'M2802 1759C2782 1767 2762 1779 2746 1793C2762 1787 2786 1773 2802 1759Z',ocv2:'M3196 -553C3177 -541 3158 -530 3139 -519C3158 -526 3177 -538 3196 -553Z',osh:'M-1388 -826C-1363 -837 -1336 -833 -1332 -816C-1336 -801 -1367 -801 -1388 -826Z',osf:'M-83 -1100C-57 -1108 -28 -1104 -24 -1091C-28 -1079 -57 -1079 -83 -1100Z',hb:'M500 860L520 820L600 760',hr:'M1040 520L930 567',gb3:'M1240 760L1330 790',gr3:'M1560 860L1470 820',ogb:'M2350 1520L2440 1460',ogr:'M2750 1350L2650 1300',ogb2:'M-1200 2500L-1110 2440',ogr2:'M-700 2150L-800 2200',fac:'M-900 -120L-700 -80',sb5:'M-350 260L-260 230',ocsg:'M-1500 -320H-1470A16 16 0 0 1 -1470 -288H-1500A16 16 0 0 1 -1500 -320Z',osag:'M-2000 1000L-1880 960',osb:'M-1700 700L-1800 760',hel1:'M700 1050C800 950 950 900 1050 800',hel2:'M1650 700C1500 720 1350 760 1250 820',r9:'M1800 560C1300 480 700 520 -200 420',gt7:'M-200 620C400 560 1000 600 1800 500',gt8:'M-150 850C400 780 900 700 1750 640',hcap:'M1900 -600H2400A60 60 0 0 1 2400 -480H1900A60 60 0 0 1 1900 -600Z',oh4:'M4300 600C3000 500 2000 300 800 -300',otk2:'M-400 2600H600A80 80 0 0 1 600 2760H-400A80 80 0 0 1 -400 2600Z',uk2:'M-2300 -1200L1600 1100'};
 function tsdChart(){const R=seeded(23),rn=(a,b)=>a+R()*(b-a),f=n=>n.toFixed(0);
  const md=(a,b,d,amp)=>{if(!d)return[a];const m=[(a[0]+b[0])/2+rn(-amp,amp),(a[1]+b[1])/2+rn(-amp,amp)];return md(a,m,d-1,amp*.55).concat(md(m,b,d-1,amp*.55))};
  const jag=(pts,d,amp)=>{let o=[];for(let i=0;i<pts.length-1;i++)o=o.concat(md(pts[i],pts[i+1],d,amp));o.push(pts[pts.length-1]);return o};
@@ -318,7 +318,7 @@ function sitLayer(){const A='#ffd60a',RD='#ff3b30',W='#e8eef0',GR='#8a949a';cons
  let s='<defs>'+Object.entries(SITP).map(([k,d])=>'<path id="sp-'+k+'" d="'+d+'"/>').join('')+'</defs><g class="pan"><g class="ch-o">'+tsdOuter()+'</g><g class="ch-i">'+tsdChart()+'</g><g class="sym">';
  s+='<g stroke="'+W+'" stroke-opacity=".5" fill="none"><circle cx="110" cy="590" r="35"/><circle cx="110" cy="590" r="70"/><circle cx="110" cy="590" r="105" stroke-dasharray="4 6"/><path d="M110 470V710M0 590H220"/></g>';
  s+=sam(1490,190,125,A,'10',5)+sam(140,880,95,A,'11',4)+sam(1490,780,60,GR,'S',0)+sam(1520,610,70,RD,'6',2.5);
- s+=sam(3300,-200,200,A,'10',6)+sam(2600,1100,120,RD,'6',3)+sam(1900,2000,150,A,'11',4.5)+sam(3700,1800,90,GR,'S',0)+sam(-600,2300,130,A,'15',5)+sam(3900,500,110,RD,'3',2.8);
+ s+=sam(3300,-200,200,A,'10',6)+sam(2600,1100,120,RD,'6',3)+sam(1900,2000,150,A,'11',4.5)+sam(3700,1800,90,GR,'S',0)+sam(-600,2300,130,A,'15',5)+sam(3900,500,110,RD,'3',2.8)+sam(900,300,110,RD,'11',3.2)+sam(650,850,70,A,'15',4)+sam(2200,-200,140,RD,'2',3.6)+sam(-300,1700,100,A,'8',4.4);
  s+='<path d="M880 175L1000 145L1110 180L1210 140L1290 175"'+st(W)+' stroke-opacity=".7" stroke-dasharray="6 6"/><circle cx="880" cy="175" r="14"'+st(W)+'/><circle cx="1000" cy="145" r="9"'+st(W)+'/><circle cx="1110" cy="180" r="9"'+st(W)+'/><rect x="1201" y="131" width="18" height="18"'+st(W)+'/><path d="M1290 163L1301 183H1279Z"'+st(W)+'/>';
  return '<svg class="sit" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">'+s+'<g id="sit-dyn"></g></g></g></svg>'}
 const SIT=sitLayer();
@@ -338,10 +338,10 @@ function sitRun(){cancelAnimationFrame(sitRaf);const svg=root.querySelector('.si
   {path:'sea',period:90,n:1,kind:'ship',side:'F',trail:.001,fight:1},
   {path:'sb2',t0:0,dur:50,n:1,kind:'ship',side:'F',trail:.001,fight:1},
   {path:'sb3',t0:40,dur:50,n:1,kind:'ship',side:'F',trail:.001,fight:1,noDie:1},
-  {path:'sr1',t0:0,dur:62,n:2,kind:'ship',side:'H',trail:.16,fight:1},
+  {path:'sr1',t0:0,dur:62,n:2,kind:'ship',side:'H',trail:.3,fight:1},
   {path:'sr2',t0:40,dur:48,n:1,kind:'ship',side:'H',trail:.001,fight:1},
-  {path:'gr',t0:6,dur:80,n:4,kind:'tank',side:'H',trail:.004,wide:30,fight:1,holdXY:[1150,890],th:[32,40]},
-  {path:'gb',t0:4,dur:82,n:4,kind:'tank',side:'F',trail:.004,wide:30,fight:1,holdXY:[930,895],th:[30,40]},
+  {path:'gr',t0:4,dur:84,n:4,kind:'tank',side:'H',trail:.004,wide:30,fight:1},
+  {path:'gb',t0:2,dur:84,n:4,kind:'tank',side:'F',trail:.004,wide:30,fight:1},
   {path:'cap2',period:30,n:1,kind:'ppli',side:'F',alt:'22',shots:2,range:260},
   {path:'cap2',period:30,n:1,kind:'donor',ph:.5,side:'F',alt:'24',shots:1,range:260},
   {path:'r1',t0:14,dur:48,n:3,kind:'ho',side:'H',form:'wedge',alt:'31',shots:1,range:260},
@@ -360,12 +360,12 @@ function sitRun(){cancelAnimationFrame(sitRaf);const svg=root.querySelector('.si
   {path:'gt6',t0:55,dur:33,n:4,kind:'fr',side:'F',form:'finger',alt:'25',shots:1,range:270},
   {path:'oh3',t0:30,dur:55,n:2,kind:'ho',side:'H',form:'abreast',alt:'30',shots:1,range:270},
   {path:'of3',t0:12,dur:70,n:2,kind:'fr',side:'F',form:'abreast',alt:'26',shots:1,range:280},
-  {path:'gr2',t0:26,dur:62,n:4,kind:'tank',side:'H',trail:.004,wide:30,fight:1,holdXY:[1530,350],th:[50,58]},
-  {path:'gb2',t0:24,dur:64,n:4,kind:'tank',side:'F',trail:.004,wide:30,fight:1,holdXY:[1420,170],th:[50,58]},
+  {path:'gr2',t0:22,dur:66,n:4,kind:'tank',side:'H',trail:.004,wide:30,fight:1},
+  {path:'gb2',t0:20,dur:68,n:4,kind:'tank',side:'F',trail:.004,wide:30,fight:1},
   {path:'sr3',t0:18,dur:55,n:1,kind:'ship',side:'H',trail:.001,fight:1},
   {path:'sb4',t0:25,dur:60,n:1,kind:'ship',side:'F',trail:.001,fight:1},
   {path:'un',t0:4,dur:70,n:1,kind:'uk',dot:1,flash:1,side:'N',alt:'15'},
-  {path:'road',t0:0,dur:84,n:4,kind:'tank',side:'H',trail:.035,strike:[[1,28],[3,46]]},
+  {path:'road',t0:0,dur:84,n:4,kind:'tank',side:'H',trail:.2,strike:[[1,28],[3,46]]},
   {path:'ocap',period:45,n:4,kind:'fr',side:'F',form:'echL',alt:'28',shots:2,range:320},
   {path:'otk',period:90,n:1,kind:'fr',side:'F',alt:'24'},
   {path:'ohc',period:45,n:2,kind:'ho',side:'H',form:'abreast',alt:'33',shots:1,range:300},
@@ -377,12 +377,34 @@ function sitRun(){cancelAnimationFrame(sitRaf);const svg=root.querySelector('.si
   {path:'ouk',t0:20,dur:60,n:1,kind:'uk',dot:1,flash:1,side:'N',alt:'9'},
   {path:'ofp',period:45,n:2,kind:'fr',side:'F',form:'abreast',alt:'19',shots:1,range:280},
   {path:'ohp',period:45,n:2,kind:'ho',side:'H',form:'abreast',alt:'29',shots:1,range:280},
-  {path:'ocv',period:90,n:5,kind:'tank',side:'H',trail:.07},
-  {path:'ocv2',period:90,n:4,kind:'tank',side:'H',trail:.08},
-  {path:'osh',period:90,n:3,kind:'ship',side:'H',trail:.12},
-  {path:'osf',period:90,n:3,kind:'ship',side:'F',trail:.12}];
+  {path:'ocv',period:90,n:5,kind:'tank',side:'H',trail:.12},
+  {path:'ocv2',period:90,n:4,kind:'tank',side:'H',trail:.13},
+  {path:'osh',period:90,n:3,kind:'ship',side:'H',trail:.16},
+  {path:'osf',period:90,n:3,kind:'ship',side:'F',trail:.16},
+  {path:'hb',t0:0,dur:88,n:5,kind:'tank',side:'F',trail:.14,fight:1},
+  {path:'hr',t0:0,dur:88,n:5,kind:'tank',side:'H',trail:.16,fight:1,strike:[[0,40],[2,62]]},
+  {path:'gb3',t0:12,dur:75,n:3,kind:'tank',side:'F',trail:.004,wide:26,fight:1},
+  {path:'gr3',t0:10,dur:75,n:3,kind:'tank',side:'H',trail:.004,wide:26,fight:1},
+  {path:'ogb',t0:8,dur:80,n:4,kind:'tank',side:'F',trail:.004,wide:34,fight:1},
+  {path:'ogr',t0:5,dur:80,n:4,kind:'tank',side:'H',trail:.004,wide:34,fight:1,strike:[[1,50]]},
+  {path:'ogb2',t0:15,dur:72,n:3,kind:'tank',side:'F',trail:.004,wide:30,fight:1},
+  {path:'ogr2',t0:12,dur:74,n:3,kind:'tank',side:'H',trail:.004,wide:30,fight:1},
+  {path:'fac',t0:10,dur:60,n:3,kind:'ship',side:'H',trail:.06,fight:1},
+  {path:'sb5',t0:0,dur:88,n:2,kind:'ship',side:'F',trail:.3,fight:1},
+  {path:'ocsg',period:90,n:4,kind:'ship',side:'F',trail:.1,fight:1},
+  {path:'osag',t0:5,dur:85,n:3,kind:'ship',side:'H',trail:.2,fight:1},
+  {path:'osb',t0:8,dur:80,n:2,kind:'ship',side:'F',trail:.25,fight:1},
+  {path:'hel1',t0:30,dur:30,n:2,kind:'fr',side:'F',form:'abreast',alt:'1'},
+  {path:'hel2',t0:15,dur:35,n:2,kind:'ho',side:'H',form:'abreast',alt:'2'},
+  {path:'r9',t0:5,dur:40,n:4,kind:'ho',side:'H',form:'finger',alt:'29',shots:1,range:260},
+  {path:'gt7',t0:12,dur:42,n:4,kind:'fr',side:'F',form:'finger',alt:'31',shots:2,range:300},
+  {path:'gt8',t0:45,dur:40,n:2,kind:'fr',side:'F',form:'abreast',alt:'21',shots:2,range:280},
+  {path:'hcap',period:45,n:2,kind:'ho',side:'H',form:'abreast',alt:'32',shots:2,range:300},
+  {path:'oh4',t0:50,dur:38,n:3,kind:'ho',side:'H',form:'wedge',alt:'35',shots:1,range:260},
+  {path:'otk2',period:90,n:1,kind:'fr',side:'F',alt:'26'},
+  {path:'uk2',t0:0,dur:85,n:1,kind:'uk',dot:1,flash:1,side:'N',alt:'36'}];
  groups.forEach(g=>{g.v=PT[g.path].L/(g.period||g.dur);g.ph=g.ph||0;g.form=g.form||'abreast';if(g.holdXY){const P=PT[g.path];let bi=0,bd=1e9;for(let i=0;i<=P.n;i++){const d=Math.hypot(P.xs[i]-g.holdXY[0],P.ys[i]-g.holdXY[1]);if(d<bd){bd=d;bi=i}}g.hold=[bi/P.n,g.th[0],g.th[1]]}});
- const sams=[{x:1490,y:190,r:125},{x:140,y:880,r:95},{x:1520,y:610,r:70},{x:3300,y:-200,r:200},{x:2600,y:1100,r:120},{x:1900,y:2000,r:150},{x:-600,y:2300,r:130},{x:3900,y:500,r:110}];
+ const sams=[{x:1490,y:190,r:125},{x:140,y:880,r:95},{x:1520,y:610,r:70},{x:3300,y:-200,r:200},{x:2600,y:1100,r:120},{x:1900,y:2000,r:150},{x:-600,y:2300,r:130},{x:3900,y:500,r:110},{x:900,y:300,r:110},{x:650,y:850,r:70},{x:2200,y:-200,r:140},{x:-300,y:1700,r:100}];
  function offs(g,i,t){if(g.form!=='cycle')return F[g.form][i]||[0,0];const q=(((t%CYC)+CYC)%CYC)/CYC*CYCLEF.length,k=Math.floor(q),e=ss(.82,1,q-k),A=F[CYCLEF[k]][i],B=F[CYCLEF[(k+1)%CYCLEF.length]][i];return[A[0]+(B[0]-A[0])*e,A[1]+(B[1]-A[1])*e]}
  const units=[];groups.forEach(g=>{g.mem=[];for(let i=0;i<g.n;i++){const u={g,i,side:g.side,open:!g.period};g.mem.push(u);units.push(u)}});
  const air=units.filter(u=>!u.g.trail),gnd=units.filter(u=>u.g.trail);
@@ -392,7 +414,7 @@ function sitRun(){cancelAnimationFrame(sitRaf);const svg=root.querySelector('.si
  const OUT=p=>p&&p.x>-2300&&p.x<3900&&p.y>-1400&&p.y<2400,edgeBad=(x,y)=>x>-80&&x<1680&&y>-80&&y<1080&&!(x>70&&x<1530&&y>70&&y<930);
  const MSP=150,MTR=2.2,HIT=14,MAXF=9,CONE=.75,LEAD=1,MINR=175;
  function simulate(events,gen){air.forEach(u=>{u.on=0;u.alive=1;u.shots=(!u.g.shooters||u.g.shooters.includes(u.i))?(u.g.shots||0):0;u.next=0;u.X=new Float32Array(N);u.Y=new Float32Array(N);u.H=new Float32Array(N);u.O=new Uint8Array(N);u.WX=new Float32Array(2*FPS);u.WY=new Float32Array(2*FPS);u.WH=new Float32Array(2*FPS)});
-  const samShots=sams.map(()=>3);const byS=new Map(),byT=new Map();
+  const samShots=sams.map(()=>4);const byS=new Map(),byT=new Map();
   const index=e=>{if(e.sh.u){if(!byS.has(e.sh.u))byS.set(e.sh.u,[]);byS.get(e.sh.u).push(e)}if(!byT.has(e.tg))byT.set(e.tg,[]);byT.get(e.tg).push(e)};
   events.forEach(e=>{if(e.strike)return;e.m=null;e.done=0;e.hit=0;e.MX=new Float32Array(N);e.MY=new Float32Array(N);e.MO=new Uint8Array(N);index(e)});
   const init=(g,t)=>{const u0=g.period?t/g.period+g.ph:(t-g.t0)/g.dur,L=at(g.path,u0);g.mem.forEach(m=>{if(!m.alive)return;const o=offs(g,m.i,t),c=Math.cos(L.h),s=Math.sin(L.h);m.x=L.x+o[0]*c-o[1]*s;m.y=L.y+o[0]*s+o[1]*c;m.h=L.h;m.v=g.v;m.on=1})};
@@ -418,7 +440,7 @@ function sitRun(){cancelAnimationFrame(sitRaf);const svg=root.querySelector('.si
     if(Math.hypot(tg.x-m.x,tg.y-m.y)<HIT){e.done=1;e.hit=1;e.t1=t;e.bx=m.x;e.by=m.y;tg.alive=0}
     else if(m.ft>MAXF){e.done=1;e.t1=t;if(gen)tg.marked=0}}
    for(const u of air){if(u.alive&&u.killT!==undefined&&t>=u.killT)u.alive=0}
-   if(gen&&t>=0&&t<CYC-14&&s%3===0){const fly=events.filter(e=>!e.strike&&!e.done&&t>=e.t0-LEAD).length;if(fly<4){
+   if(gen&&t>=0&&t<CYC-14&&s%3===0){const fly=events.filter(e=>!e.strike&&!e.done&&t>=e.t0-LEAD).length;if(fly<7){
      const shooters=[...air.filter(u=>u.alive&&u.on&&u.shots>0&&u.next<=t).map(u=>({u,p:{x:u.x,y:u.y},r:u.g.range,side:u.side})),...sams.map((q,k)=>samShots[k]>0?{s:k,p:{x:q.x,y:q.y},r:q.r,side:'H'}:null).filter(Boolean)];
      for(const sh of shooters){if(!OUT(sh.p))continue;let best=null,bd=1e9;for(const tg of air){if(!tg.open||!tg.alive||!tg.on||tg.marked||tg.side===sh.side||tg.side==='N')continue;if(!OUT(tg))continue;const d=Math.hypot(tg.x-sh.p.x,tg.y-sh.p.y);if(d>=sh.r||d>=bd||(sh.u&&d<MINR))continue;
        if(sh.u&&Math.abs(wrap(Math.atan2(tg.y-sh.p.y,tg.x-sh.p.x)-sh.u.h))>CONE)continue;bd=d;best=tg}
@@ -432,7 +454,7 @@ function sitRun(){cancelAnimationFrame(sitRaf);const svg=root.querySelector('.si
  simulate(events,false);
  const shots=events.filter(e=>!e.strike&&e.m);
  const GS={tank:{r:430,cd:4.2,sp:1100,p:{F:.42,H:.3}},ship:{r:560,cd:8,sp:70,p:{F:.7,H:.6}}},RG=seeded(97),gev=[];
- const VIS={tank:p=>p.x>20&&p.x<1580&&p.y>20&&p.y<980,ship:p=>p.x>-900&&p.x<900&&p.y>-700&&p.y<500};
+ const VIS={tank:p=>(p.x>20&&p.x<1580&&p.y>20&&p.y<980)||((p.x<-200||p.x>1800||p.y<-200||p.y>1200)&&OUT(p)),ship:p=>p.x>-2200&&p.x<900&&p.y>-1300&&p.y<500&&!edgeBad(p.x,p.y)};
  const fighters=units.filter(u=>u.g.fight);fighters.forEach(u=>{u.nx=(u.g.t0||0)+1.5+RG()*2.5;u.gm=0});
  const gal=(u,t)=>u.dead===undefined||t<u.dead,gp=(u,t)=>gal(u,t)?gpos(u,t):null;
  for(let t=0;t<CYC-6;t+=.25){for(const u of fighters){if(t<u.nx)continue;const k=u.g.kind,S=GS[k],p=gp(u,t);if(!p||!VIS[k](p))continue;let best=null,bd=1e9;
