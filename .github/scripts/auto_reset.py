@@ -17,6 +17,10 @@ MARK = "autoreset.json"
 RECENT_HOURS = 12  # a hand Reset this recent means the round already started fresh
 
 
+def vkey(v):
+    return tuple(int(x) for x in re.findall(r"\d+", str(v))[:4])
+
+
 def now_iso():
     return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
 
@@ -99,12 +103,30 @@ def main():
     c = snap["counts"]
     print(f"Stable {stable}: round for build {build or '?'} has {c['ok']} working, {c['bad']} broken, {c['open']} not tested, "
           f"{len(snap['testers'])} tester(s), {len(reports)} report doc(s), {len(items)} check(s).")
+    mref = db.document("config/autoreset")
+    msnap = mref.get()
+    marker = msnap.to_dict() if msnap.exists else {}
+    print(f"Last automatic reset was for Stable {marker.get('stable') or '(none yet)'}.")
     if hand:
         print(f"A dev already reset the checklist at {hand[0].get('at')}, so no automatic reset is needed.")
     if dry:
         print("Dry run: nothing written.")
         return
-    if not hand:
+
+    @firestore.transactional
+    def claim(tx):
+        snap = mref.get(transaction=tx)
+        cur = snap.to_dict() if snap.exists else {}
+        if cur.get("stable") and vkey(stable) <= vkey(cur["stable"]):
+            return False
+        tx.set(mref, {"stable": stable, "at": now_iso(), "by": "auto"})
+        return True
+
+    won = claim(db.transaction())
+    if not won:
+        print(f"A dev's open tracker page already reset for Stable {stable}; nothing to do.")
+    if won and not hand:
+      try:
         if c["ok"] + c["bad"] > 0 or snap["testers"]:
             bid = re.sub(r"[^0-9A-Za-z.-]", "", build or "build") + "-" + b36(int(time.time() * 1000))
             snap["stable"] = stable
@@ -123,6 +145,9 @@ def main():
         db.collection("log").add({"at": now_iso(), "by": "auto", "kind": "team",
                                   "text": f"reset the checklist automatically because Stable {stable} was released"})
         print(f"Reset {len(items)} checks and cleared {len(reports)} tester report doc(s).")
+      except Exception:
+        mref.set(marker) if marker else mref.delete()  # let the next run (or a dev's page) try again
+        raise
     with open(MARK, "w", encoding="utf-8") as f:
         json.dump({"stable": stable, "at": now_iso(), "skipped": bool(hand)}, f, indent=1)
         f.write("\n")

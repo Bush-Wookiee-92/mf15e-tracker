@@ -556,12 +556,13 @@ async function ckInit(){FB=await fbReady();if(!FB){CK.mode='off';CK.err='setup';
   applyTeam(t);CK.mode='wait';refresh();
   const sub=(c,f)=>UNS.push(FB.F.onSnapshot(FB.F.collection(FB.fs,c),f,x=>{if(c==='items'){CK.mode='off';CK.err=x.code;refresh()}}));
   UNS.push(FB.F.onSnapshot(FB.F.doc(FB.fs,'config/team'),s=>{if(!s.exists())return;const wasAdmin=CK.admin;applyTeam(s.data());if(!CK.tester){unsubAll();CK.mode='noaccess';CK.items={};CK.reports={};CK.log=[]}else if(CK.admin&&!wasAdmin)watchReq();refresh()},()=>{unsubAll();CK.mode='noaccess';refresh()}));
-  sub('items',s=>{const m={};s.docs.forEach(d=>{m[d.id]=d.data()});CK.items=m;CK.mode='live';refresh();saveBuild()});
+  sub('items',s=>{const m={};s.docs.forEach(d=>{m[d.id]=d.data()});CK.items=m;if(CK.mode!=='live'){LIVE_AT=Date.now();setTimeout(checkBuild,20000)}CK.mode='live';refresh();saveBuild()});
   sub('reports',s=>{const m={};s.docs.forEach(d=>{m[d.id]=d.data()});CK.reports=m;refresh()});
   sub('people',s=>{s.docs.forEach(d=>{const v=d.data();CK.names[d.id]=(v.name||'');CK.rigs[d.id]=v.rig||null;if(v.email)EMN[String(v.email).toLowerCase()]=v.name||''});refresh()});
   sub('photos',s=>{s.docs.forEach(d=>{PHOTOS[d.id]=d.data().url||''});refresh()});
   UNS.push(FB.F.onSnapshot(FB.F.query(FB.F.collection(FB.fs,'log'),FB.F.orderBy('at','desc'),FB.F.limit(150)),s=>{CK.log=s.docs.map(d=>d.data());refresh()},()=>{}));
   UNS.push(FB.F.onSnapshot(FB.F.query(FB.F.collection(FB.fs,'builds'),FB.F.orderBy('at','desc'),FB.F.limit(20)),s=>{CK.builds=s.docs.map(d=>Object.assign({id:d.id},d.data()));refresh()},()=>{}));
+  UNS.push(FB.F.onSnapshot(FB.F.doc(FB.fs,'config/autoreset'),s=>{AUTORS=s.exists()?s.data():null;autoReset()},()=>{}));
   UNS.push(FB.F.onSnapshot(FB.F.doc(FB.fs,'config/seeded'),s=>{SKIP=(s.exists()&&s.data().skip)||[];refresh()},()=>{}));
   UNS.push(FB.F.onSnapshot(FB.F.doc(FB.fs,'config/roadmap'),s=>{if(!s.exists())return;const j=s.data().json;if(!j||j===lastRoad)return;try{const o=JSON.parse(j);if(o&&Array.isArray(o.tiles)&&o.meta){lastRoad=j;o.credits=Object.assign({},S.credits,o.credits);S=o;if(!T().some(x=>x.id===sel)){const c=T().find(x=>x.kind==='current');sel=c?c.id:(T()[0]||{}).id}render();applyBuild()}}catch(e){}},()=>{}));
   if(CK.admin)watchReq();
@@ -603,9 +604,20 @@ function setBuild(ver,done){if(!CK.admin||!ver)return;S.meta.current=ver;const c
 function buildForm(){if(!CK.admin)return;const f=document.getElementById('frm');f.innerHTML='<form class="f" id="bvf"><h3>Current build</h3><p class="full" style="margin:0;color:var(--mut)">The version the team is testing. New &#10003;, &#10007; and tester results are stamped with it, and it shows on the gold star sector. Only the owner and devs can change it.</p><label class="full">Version<input id="bv-v" required maxlength="20" value="'+esc(S.meta.current)+'"></label><p class="full msg">Starting a fresh round of testing? Use Reset instead: it sets the version and clears the checklist in one go.</p><div class="row full"><button type="button" class="btn" data-close>Cancel</button><button class="btn on">Save</button></div></form>';f.showModal();
  f.querySelector('#bvf').onsubmit=e=>{e.preventDefault();const v=f.querySelector('#bv-v').value.trim();f.close();if(!v||v===S.meta.current)return;setBuild(v,'Current build is now '+v+'.');logAct({kind:'team',text:'set the current build to '+v})}}
 /* ---- newest builds, found by the GitHub Actions watcher (.github/workflows/watch-builds.yml) ---- */
-let LATEST=null,BUILD_PENDING=false;
+let LATEST=null,BUILD_PENDING=false,AUTORS,STABLE_PUB=null,AR_BUSY=false,LIVE_AT=0;
+// Backup for the cloud build watcher: a dev's open page reads the newest Stable build from the public repo and,
+// when it is newer than config/autoreset, resets the checklist once (a transaction makes sure only one page does it).
+async function pubStable(){try{const r=await fetch('https://api.github.com/repos/65thhaack/Modern-F15E-Mod/releases?per_page=20',{cache:'no-store'});if(!r.ok)return null;let best=null;(await r.json()).forEach(rel=>{if(rel.draft)return;const N=(rel.assets||[]).map(a=>a.name||''),f=[];N.forEach(n=>{const m=/^DcsWebDatalink-(\d+\.\d+\.\d+)-full\.nupkg$/.exec(n);if(m)f.push(m[1])});if(!f.length&&!rel.prerelease&&!N.some(n=>/-[a-z]+-full\.nupkg$/.test(n))){const m=/^[vV]?(\d+\.\d+\.\d+)/.exec(rel.tag_name||'');if(m)f.push(m[1])}f.forEach(v=>{if(!best||vnewer(v,best))best=v})});return best}catch(e){return null}}
+async function autoReset(){if(AR_BUSY||LOCAL||!FB||!CK.admin||CK.mode!=='live'||AUTORS===undefined||Date.now()-LIVE_AT<15000)return;
+ const st=[STABLE_PUB,LATEST&&LATEST.stable].filter(Boolean).reduce((a,b)=>!a||vnewer(b,a)?b:a,null);if(!st)return;const ref=FB.F.doc(FB.fs,'config/autoreset');
+ if(!AUTORS||!AUTORS.stable){AR_BUSY=true;try{await FB.F.setDoc(ref,{stable:st,at:nowI(),by:CK.me,first:true})}catch(e){}AR_BUSY=false;return}
+ if(!vnewer(st,AUTORS.stable)||!Object.keys(CK.items).length)return;AR_BUSY=true;const prev=AUTORS;let won=false;
+ try{won=await FB.F.runTransaction(FB.fs,async tx=>{const d=await tx.get(ref),cur=d.exists()?d.data():{};if(cur.stable&&!vnewer(st,cur.stable))return false;tx.set(ref,{stable:st,at:nowI(),by:CK.me});return true});if(!won)return;
+  const cut=new Date(Date.now()-12*3600e3).toISOString();if((CK.log||[]).some(e=>e.kind==='team'&&/^reset the checklist/.test(e.text||'')&&String(e.at||'')>=cut)){say('Stable '+st+' is out. The checklist was already reset in the last 12 hours, so it was left as it is.');return}
+  const n=await doReset(false,false);logAct({kind:'team',text:'reset the checklist automatically because Stable '+st+' was released'});say('Stable '+st+' is out, so the checklist was reset automatically: '+n+' checks are back to Not tested and the last round is in Build history.')}
+ catch(e){if(won)FB.F.setDoc(ref,prev).catch(()=>{});fail(e)}finally{AR_BUSY=false}}
 function vnewer(a,b){const x=(String(a).match(/\d+/g)||[]).map(Number),y=(String(b).match(/\d+/g)||[]).map(Number);for(let i=0;i<Math.max(x.length,y.length);i++){const d=(x[i]||0)-(y[i]||0);if(d)return d>0}return false}
-async function checkBuild(){let b=null;for(const u of ['https://raw.githubusercontent.com/Bush-Wookiee-92/mf15e-tracker/main/build.json?t='+Date.now(),'build.json?t='+Date.now()]){try{const r=await fetch(u,{cache:'no-store'});if(r.ok){b=await r.json();break}}catch(e){}}if(b&&b.tester){LATEST=b;applyBuild()}}
+async function checkBuild(){let b=null;for(const u of ['https://raw.githubusercontent.com/Bush-Wookiee-92/mf15e-tracker/main/build.json?t='+Date.now(),'build.json?t='+Date.now()]){try{const r=await fetch(u,{cache:'no-store'});if(r.ok){b=await r.json();break}}catch(e){}}if(b&&b.tester){LATEST=b;applyBuild()}if(CK.admin&&!LOCAL){const v=await pubStable();if(v)STABLE_PUB=v;autoReset()}}
 function applyBuild(){if(!LATEST||!LATEST.tester||!vnewer(LATEST.tester,S.meta.current))return;const v=LATEST.tester;S.meta.current=v;const c=T().find(t=>t.kind==='current');if(c){c.ver=v;if(/^Version /.test(c.title))c.title='Version '+v}render();msg='New tester build '+v+' is out. New results are stamped with '+v+'.';say(msg);BUILD_PENDING=true;saveBuild()}
 function saveBuild(){if(!BUILD_PENDING||LOCAL||!FB||!CK.admin||CK.mode!=='live')return;BUILD_PENDING=false;saveRoad('Tester build '+S.meta.current+' detected and saved for the team.');logAct({kind:'team',text:'tester build '+S.meta.current+' was detected automatically'})}
 function resetForm(){if(!CK.admin)return;const f=document.getElementById('frm');

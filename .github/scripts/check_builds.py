@@ -42,7 +42,9 @@ def newest(rels, channel=None):
             m = re.match(r"DcsWebDatalink-(\d+\.\d+\.\d+)(?:-([a-z]+))?-full\.nupkg$", a.get("name", ""))
             if m and (m.group(2) or "stable") == (channel or "stable"):
                 found.append(m.group(1))
-        if not found and channel in (None, "stable", "tester"):
+        names = [a.get("name", "") for a in rel.get("assets", [])]
+        other = any(re.search(r"-[a-z]+-full\.nupkg$", n) for n in names)  # e.g. a Preview-only release
+        if not found and channel in (None, "stable", "tester") and not (channel in (None, "stable") and (other or rel.get("prerelease"))):
             tag = re.sub(r"^[vV]", "", rel.get("tag_name", ""))
             if re.match(r"^\d+\.\d+\.\d+", tag):
                 found.append(re.match(r"^\d+\.\d+\.\d+", tag).group(0))

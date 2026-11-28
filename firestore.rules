@@ -60,6 +60,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // The Stable build the checklist was last reset for (set by a dev's page or the cloud build watcher).
+    match /config/autoreset {
+      allow read: if isMember();
+      allow write: if isAdmin();
+    }
+
     // Who did what: anyone on the team adds entries as themselves; nobody edits them; the owner and devs can clear them.
     match /log/{id} {
       allow read: if isMember();
