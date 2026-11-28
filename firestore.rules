@@ -88,6 +88,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Build history: a dev's Reset saves the round's results here first; the team can look back.
+    match /builds/{id} {
+      allow read: if isMember();
+      allow write: if isAdmin();
+    }
+
     // "Ask to join": anyone signed in can file their own request; leads read and clear them.
     match /requests/{uid} {
       allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
