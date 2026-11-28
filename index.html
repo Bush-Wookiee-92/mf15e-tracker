@@ -545,13 +545,13 @@ async function ckInit(){FB=await fbReady();if(!FB){CK.mode='off';CK.err='setup';
   applyTeam(t);CK.mode='wait';refresh();
   const sub=(c,f)=>UNS.push(FB.F.onSnapshot(FB.F.collection(FB.fs,c),f,x=>{if(c==='items'){CK.mode='off';CK.err=x.code;refresh()}}));
   UNS.push(FB.F.onSnapshot(FB.F.doc(FB.fs,'config/team'),s=>{if(!s.exists())return;const wasAdmin=CK.admin;applyTeam(s.data());if(!CK.tester){unsubAll();CK.mode='noaccess';CK.items={};CK.reports={};CK.log=[]}else if(CK.admin&&!wasAdmin)watchReq();refresh()},()=>{unsubAll();CK.mode='noaccess';refresh()}));
-  sub('items',s=>{const m={};s.docs.forEach(d=>{m[d.id]=d.data()});CK.items=m;CK.mode='live';refresh()});
+  sub('items',s=>{const m={};s.docs.forEach(d=>{m[d.id]=d.data()});CK.items=m;CK.mode='live';refresh();saveBuild()});
   sub('reports',s=>{const m={};s.docs.forEach(d=>{m[d.id]=d.data()});CK.reports=m;refresh()});
   sub('people',s=>{s.docs.forEach(d=>{const v=d.data();CK.names[d.id]=(v.name||'');if(v.email)EMN[String(v.email).toLowerCase()]=v.name||''});refresh()});
   sub('photos',s=>{s.docs.forEach(d=>{PHOTOS[d.id]=d.data().url||''});refresh()});
   UNS.push(FB.F.onSnapshot(FB.F.query(FB.F.collection(FB.fs,'log'),FB.F.orderBy('at','desc'),FB.F.limit(150)),s=>{CK.log=s.docs.map(d=>d.data());refresh()},()=>{}));
   UNS.push(FB.F.onSnapshot(FB.F.doc(FB.fs,'config/seeded'),s=>{SKIP=(s.exists()&&s.data().skip)||[];refresh()},()=>{}));
-  UNS.push(FB.F.onSnapshot(FB.F.doc(FB.fs,'config/roadmap'),s=>{if(!s.exists())return;const j=s.data().json;if(!j||j===lastRoad)return;try{const o=JSON.parse(j);if(o&&Array.isArray(o.tiles)&&o.meta){lastRoad=j;o.credits=Object.assign({},S.credits,o.credits);S=o;if(!T().some(x=>x.id===sel)){const c=T().find(x=>x.kind==='current');sel=c?c.id:(T()[0]||{}).id}render()}}catch(e){}},()=>{}));
+  UNS.push(FB.F.onSnapshot(FB.F.doc(FB.fs,'config/roadmap'),s=>{if(!s.exists())return;const j=s.data().json;if(!j||j===lastRoad)return;try{const o=JSON.parse(j);if(o&&Array.isArray(o.tiles)&&o.meta){lastRoad=j;o.credits=Object.assign({},S.credits,o.credits);S=o;if(!T().some(x=>x.id===sel)){const c=T().find(x=>x.kind==='current');sel=c?c.id:(T()[0]||{}).id}render();applyBuild()}}catch(e){}},()=>{}));
   if(CK.admin)watchReq();
   if(CK.tester){const pr=FB.F.doc(FB.fs,'people/'+u.uid);FB.F.getDoc(pr).then(d=>{const v=d.exists()?d.data():{};const o={email:em};if(!v.name)o.name=(u.displayName||em.split('@')[0]).split(' ')[0];return FB.F.setDoc(pr,o,{merge:true})}).catch(()=>{})}
  })}
@@ -590,6 +590,12 @@ function teamForm(){if(!CK.admin||!TEAM)return;const f=document.getElementById('
 function setBuild(ver,done){if(!CK.admin||!ver)return;S.meta.current=ver;const c=T().find(t=>t.kind==='current');if(c){c.ver=ver;if(/^Version /.test(c.title))c.title='Version '+ver}S.meta.updated=new Date().toISOString().slice(0,10);try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}render();if(LOCAL)say(done||'Saved.');else saveRoad(done)}
 function buildForm(){if(!CK.admin)return;const f=document.getElementById('frm');f.innerHTML='<form class="f" id="bvf"><h3>Current build</h3><p class="full" style="margin:0;color:var(--mut)">The version the team is testing. New &#10003;, &#10007; and tester results are stamped with it, and it shows on the gold star sector. Only the owner and devs can change it.</p><label class="full">Version<input id="bv-v" required maxlength="20" value="'+esc(S.meta.current)+'"></label><p class="full msg">Starting a fresh round of testing? Use Reset instead: it sets the version and clears the checklist in one go.</p><div class="row full"><button type="button" class="btn" data-close>Cancel</button><button class="btn on">Save</button></div></form>';f.showModal();
  f.querySelector('#bvf').onsubmit=e=>{e.preventDefault();const v=f.querySelector('#bv-v').value.trim();f.close();if(!v||v===S.meta.current)return;setBuild(v,'Current build is now '+v+'.');logAct({kind:'team',text:'set the current build to '+v})}}
+/* ---- newest builds, found by the GitHub Actions watcher (.github/workflows/watch-builds.yml) ---- */
+let LATEST=null,BUILD_PENDING=false;
+function vnewer(a,b){const x=(String(a).match(/\d+/g)||[]).map(Number),y=(String(b).match(/\d+/g)||[]).map(Number);for(let i=0;i<Math.max(x.length,y.length);i++){const d=(x[i]||0)-(y[i]||0);if(d)return d>0}return false}
+async function checkBuild(){let b=null;for(const u of ['https://raw.githubusercontent.com/Bush-Wookiee-92/mf15e-tracker/main/build.json?t='+Date.now(),'build.json?t='+Date.now()]){try{const r=await fetch(u,{cache:'no-store'});if(r.ok){b=await r.json();break}}catch(e){}}if(b&&b.tester){LATEST=b;applyBuild()}}
+function applyBuild(){if(!LATEST||!LATEST.tester||!vnewer(LATEST.tester,S.meta.current))return;const v=LATEST.tester;S.meta.current=v;const c=T().find(t=>t.kind==='current');if(c){c.ver=v;if(/^Version /.test(c.title))c.title='Version '+v}render();msg='New tester build '+v+' is out. New results are stamped with '+v+'.';say(msg);BUILD_PENDING=true;saveBuild()}
+function saveBuild(){if(!BUILD_PENDING||LOCAL||!FB||!CK.admin||CK.mode!=='live')return;BUILD_PENDING=false;saveRoad('Tester build '+S.meta.current+' detected and saved for the team.');logAct({kind:'team',text:'tester build '+S.meta.current+' was detected automatically'})}
 function resetForm(){if(!CK.admin)return;const f=document.getElementById('frm');
  f.innerHTML='<form class="f" id="rsf"><h3>Reset the checklist</h3><p class="full" style="margin:0;color:var(--mut)">Use this when a new build goes out. Every check goes back to Not tested, and every tester result, flag, note and reported problem is cleared. The sectors, photos and team are not touched.</p>'
  +'<label class="full sgi"><input type="checkbox" id="rs-def"> Also restore the default checklist (removes checks added by hand and brings back default checks that were deleted)</label>'
@@ -748,4 +754,5 @@ root.addEventListener('submit',e=>{const f=e.target;if(f.dataset&&f.dataset.form
 document.addEventListener('keydown',e=>{if(document.querySelector('dialog[open]')||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;if(e.key==='ArrowRight')step(1);if(e.key==='ArrowLeft')step(-1)});
 render();
 if(!LOCAL)ckInit();
+checkBuild();setInterval(checkBuild,5*60*1000);
 }</script></body></html>
