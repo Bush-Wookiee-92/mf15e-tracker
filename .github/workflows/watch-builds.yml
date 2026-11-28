@@ -1,7 +1,7 @@
 name: Watch for new Modern F-15E builds
 
 # Runs on GitHub's servers every 5 minutes (GitHub may delay scheduled runs a little),
-# and can be started by hand from the Actions tab.
+# and can be started by hand from the Actions tab (Actions > Watch for new Modern F-15E builds > Run workflow).
 # A new tester build updates build.json (the tracker's version follows it).
 # A new Stable build also resets the tracker (auto_reset.py), like a dev pressing Reset.
 on:
